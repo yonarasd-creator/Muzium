@@ -3,6 +3,8 @@
 
 Kişiselleştirilebilir müzik çalar: hesap/giriş, Discord tarzı profiller, arkadaşlar, anlık mesajlaşma, şarkı paylaşımı ve tamamen özel temalar (arka plan görseli/videosu dahil).
 
+## KOLAY KURULUM EN ALTTA
+
 ## Hızlı kurulum
 1. **Node.js 18+** kur (nodejs.org → LTS).
 2. Klasörde terminal aç (VS Code: *Terminal > New Terminal*):
@@ -57,3 +59,4 @@ Sunucuyu bir bilgisayarda/VPS'te çalıştır ve **HTTPS** arkasına koy (Caddy,
 
 ## Hazır indirmek icin (Exe dosyası)
  <img width="223" height="142" alt="image" src="https://github.com/user-attachments/assets/0ff0e589-396f-4c4e-93c1-d6b7e6a6df98" /> 
+ girdikten sonra exe dosyasını indrip kurun guncellemlerı denetleyerek guncel halde kullanbılrısnız
