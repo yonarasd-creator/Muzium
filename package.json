@@ -1,0 +1,57 @@
+{
+  "name": "muzigim",
+  "version": "2.0.0",
+  "description": "Kişiselleştirilebilir müzik çalar: hesaplar, profiller, arkadaşlar, mesajlaşma, şarkı paylaşımı, özel temalar",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node test/test.js",
+    "test:ui": "node test/ui.test.js",
+    "app": "electron electron/main.js",
+    "dist": "electron-builder"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "fake-indexeddb": "^6.0.0",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.muzigim.app",
+    "productName": "Müziğim",
+    "files": [
+      "electron/**",
+      "server/**",
+      "public/**",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "electron/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "electron/icon.png"
+    },
+    "nsis": {
+      "artifactName": "Muzigim-Kurulum-${version}.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
