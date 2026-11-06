@@ -1,5 +1,6 @@
 # 🎵 Müziğim v2
 
+
 Kişiselleştirilebilir müzik çalar: hesap/giriş, Discord tarzı profiller, arkadaşlar, anlık mesajlaşma, şarkı paylaşımı ve tamamen özel temalar (arka plan görseli/videosu dahil).
 
 ## Hızlı kurulum
@@ -53,3 +54,5 @@ Sunucuyu bir bilgisayarda/VPS'te çalıştır ve **HTTPS** arkasına koy (Caddy,
 - Kurulum dosyası üretmek için: Windows'ta `kurulum-dosyasi-olustur.bat` çift tıkla (Mac/Linux: `./kurulum-dosyasi-olustur.sh`). Sonuç `dist/` klasöründe.
 - Pencereyi kapatınca uygulama sistem tepsisine iner. Genel kısayollar: **Ctrl+Alt+M** mini oynatıcı · **Ctrl+Alt+Boşluk** oynat/duraklat · **Ctrl+Alt+←/→** önceki/sonraki.
 - Veriler kullanıcı klasöründe tutulur; sunucu 38123 portunda çalışır (`MUZIGIM_PORT`, başka sunucuya bağlanmak için `MUZIGIM_URL`).
+
+Indırmek ıcın <img width="223" height="142" alt="image" src="https://github.com/user-attachments/assets/0ff0e589-396f-4c4e-93c1-d6b7e6a6df98" /> 
