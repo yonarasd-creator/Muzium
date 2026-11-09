@@ -6,6 +6,6 @@ call npm install || (echo npm install basarisiz oldu. & pause & exit /b)
 echo Kurulum dosyasi olusturuluyor...
 call npm run dist || (echo Paketleme basarisiz oldu. & pause & exit /b)
 echo.
-echo Hazir! Kurulum dosyasi "dist" klasorunde: Muzigim-Kurulum-*.exe
+echo Hazir! Kurulum dosyasi "dist" klasorunde: Yoni-Kurulum-*.exe
 start "" "%~dp0dist"
 pause
