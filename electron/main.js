@@ -1,6 +1,6 @@
 // Yoni masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
 const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net } = require('electron');
-const path = require('path'), http = require('http');
+const path = require('path'), http = require('http'), fs = require('fs');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
 const BASE = REMOTE || `http://localhost:${PORT}`, ICON = path.join(__dirname, 'icon.png');
 let win, tray, quitting = false, manualCheck = false;
@@ -24,6 +24,26 @@ function startServer() {
   });
 }
 
+// Windows kısayolları (.lnk) .ico ister: PNG'yi 256px PNG-içeren ICO'ya çevirip masaüstü/başlat/görev çubuğu kısayollarını günceller
+function makeIco(img) {
+  const png = img.resize({ width: 256, height: 256, quality: 'best' }).toPNG(), h = Buffer.alloc(22);
+  h.writeUInt16LE(1, 2); h.writeUInt16LE(1, 4); h.writeUInt16LE(1, 10); h.writeUInt16LE(32, 12); h.writeUInt32LE(png.length, 14); h.writeUInt32LE(22, 18);
+  return Buffer.concat([h, png]);
+}
+function updateShortcuts(img) {
+  if (process.platform !== 'win32') return;
+  try {
+    const dir = path.join(app.getPath('userData'), 'icons'); fs.mkdirSync(dir, { recursive: true });
+    for (const f of fs.readdirSync(dir)) try { fs.unlinkSync(path.join(dir, f)); } catch {}
+    const ico = path.join(dir, 'app-' + Date.now() + '.ico'); fs.writeFileSync(ico, makeIco(img)); // her seferinde yeni ad: Windows önbelleği eskiyi tutmasın
+    const name = app.getName() + '.lnk', ad = app.getPath('appData');
+    for (const p of [path.join(app.getPath('desktop'), name), path.join(ad, 'Microsoft/Windows/Start Menu/Programs', name),
+      path.join(ad, 'Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar', name)])
+      if (fs.existsSync(p)) try { shell.writeShortcutLink(p, 'update', { icon: ico, iconIndex: 0 }); } catch {}
+    require('child_process').execFile('ie4uinit.exe', ['-show'], () => {}); // simge önbelleğini yenile
+  } catch (e) { console.error('Kısayol simgesi güncellenemedi:', e.message); }
+}
+
 // Uygulamada seçilen logo (sayfanın favicon'u) pencere/görev çubuğu ve tepsi simgesine de uygulanır
 function applyAppIcon(url) {
   net.fetch(url).then(r => r.ok ? r.arrayBuffer() : null).then(b => {
@@ -32,6 +52,7 @@ function applyAppIcon(url) {
     if (img.isEmpty()) return;
     if (win && !win.isDestroyed()) win.setIcon(img);
     if (tray && !tray.isDestroyed()) tray.setImage(img.resize({ width: 18, height: 18 }));
+    updateShortcuts(img);
   }).catch(() => {});
 }
 
