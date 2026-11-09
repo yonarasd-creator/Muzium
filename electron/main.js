@@ -36,10 +36,16 @@ function updateShortcuts(img) {
     const dir = path.join(app.getPath('userData'), 'icons'); fs.mkdirSync(dir, { recursive: true });
     for (const f of fs.readdirSync(dir)) try { fs.unlinkSync(path.join(dir, f)); } catch {}
     const ico = path.join(dir, 'app-' + Date.now() + '.ico'); fs.writeFileSync(ico, makeIco(img)); // her seferinde yeni ad: Windows önbelleği eskiyi tutmasın
-    const name = app.getName() + '.lnk', ad = app.getPath('appData');
-    for (const p of [path.join(app.getPath('desktop'), name), path.join(ad, 'Microsoft/Windows/Start Menu/Programs', name),
-      path.join(ad, 'Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar', name)])
-      if (fs.existsSync(p)) try { shell.writeShortcutLink(p, 'update', { icon: ico, iconIndex: 0 }); } catch {}
+    const ad = app.getPath('appData'), me = process.execPath.toLowerCase();
+    const dirs = [app.getPath('desktop'), path.join(ad, 'Microsoft/Windows/Start Menu/Programs'),
+      path.join(ad, 'Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar')];
+    for (const d of dirs) {
+      let files = []; try { files = fs.readdirSync(d).filter(f => f.toLowerCase().endsWith('.lnk')); } catch {}
+      for (const f of files) { // adına değil, bu uygulamayı açan kısayollara bakar (ad ne olursa olsun)
+        const p = path.join(d, f);
+        try { const t = shell.readShortcutLink(p); if (t.target && t.target.toLowerCase() === me) shell.writeShortcutLink(p, 'update', { icon: ico, iconIndex: 0 }); } catch {}
+      }
+    }
     require('child_process').execFile('ie4uinit.exe', ['-show'], () => {}); // simge önbelleğini yenile
   } catch (e) { console.error('Kısayol simgesi güncellenemedi:', e.message); }
 }

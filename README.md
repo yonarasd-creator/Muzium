@@ -63,4 +63,4 @@ Sunucuyu bir bilgisayarda/VPS'te çalıştır ve **HTTPS** arkasına koy (Caddy,
 
 ## Otomatik güncelleme
 Kurulu masaüstü uygulaması açılışta ve her 6 saatte bir GitHub Releases'i denetler; yeni sürüm varsa indirir ve "Şimdi yeniden başlat" diye sorar. Elle denetlemek için sistem tepsisi menüsünde **Güncellemeleri denetle**.
-Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır → GitHub'da `v<sürüm>` etiketiyle Release oluştur (örn. `v2.2.3`); derleme otomatik yapılır.
+Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır → GitHub'da `v<sürüm>` etiketiyle Release oluştur (örn. `v2.2.4`); derleme otomatik yapılır.
