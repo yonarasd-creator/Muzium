@@ -1,5 +1,5 @@
 // Yoni masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
-const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net } = require('electron');
 const path = require('path'), http = require('http');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
 const BASE = REMOTE || `http://localhost:${PORT}`, ICON = path.join(__dirname, 'icon.png');
@@ -24,11 +24,23 @@ function startServer() {
   });
 }
 
+// Uygulamada seçilen logo (sayfanın favicon'u) pencere/görev çubuğu ve tepsi simgesine de uygulanır
+function applyAppIcon(url) {
+  net.fetch(url).then(r => r.ok ? r.arrayBuffer() : null).then(b => {
+    if (!b) return;
+    const img = nativeImage.createFromBuffer(Buffer.from(b));
+    if (img.isEmpty()) return;
+    if (win && !win.isDestroyed()) win.setIcon(img);
+    if (tray && !tray.isDestroyed()) tray.setImage(img.resize({ width: 18, height: 18 }));
+  }).catch(() => {});
+}
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 820, minWidth: 900, minHeight: 600, backgroundColor: '#111', autoHideMenuBar: true, icon: ICON,
     webPreferences: { backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required', contextIsolation: true }
   });
+  win.webContents.on('page-favicon-updated', (_e, favs) => { if (favs && favs[0]) applyAppIcon(favs[0]); });
   win.loadURL(BASE);
   win.on('close', e => { if (!quitting) { e.preventDefault(); win.hide(); } }); // kapatınca tepsiye iner, müzik sürer
   win.webContents.setWindowOpenHandler(({ url, frameName }) => {
