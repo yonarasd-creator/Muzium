@@ -3,7 +3,9 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dial
 const path = require('path'), http = require('http');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
 const BASE = REMOTE || `http://localhost:${PORT}`, ICON = path.join(__dirname, 'icon.png');
-let win, tray, quitting = false;
+let win, tray, quitting = false, manualCheck = false;
+let autoUpdater = null; // yalnızca kurulu (paketlenmiş) uygulamada çalışır; geliştirmede (npm run app) devre dışı
+if (app.isPackaged) { try { ({ autoUpdater } = require('electron-updater')); } catch (e) { console.error('Güncelleyici yüklenemedi:', e.message); } }
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.exit(0); // zaten açıksa ikinci kopya hemen kapanır (sunucuyu tekrar başlatmaz)
 
@@ -46,8 +48,31 @@ function createTray() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Yoni’yi göster', click: showMain },
     { label: 'Mini oynatıcı (Ctrl+Alt+M)', click: () => run('openMini()') },
+    { label: 'Güncellemeleri denetle', click: () => checkUpdates(true) },
     { type: 'separator' }, { label: 'Çık', click: () => app.quit() }]));
   tray.on('click', showMain);
+}
+
+// --- Otomatik güncelleme: GitHub Releases'e bakar, yeni sürümü indirir, kullanıcıya sorar ---
+function checkUpdates(manual) {
+  if (!autoUpdater) { if (manual) dialog.showMessageBox({ message: 'Güncelleme yalnızca kurulu uygulamada çalışır.' }); return; }
+  manualCheck = !!manual;
+  autoUpdater.checkForUpdates().catch(e => { if (manual) dialog.showErrorBox('Güncelleme denetlenemedi', String(e.message || e)); });
+}
+function setupUpdater() {
+  if (!autoUpdater) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true; // sorulmasa bile çıkarken kurulur
+  autoUpdater.on('update-available', i => { if (manualCheck) dialog.showMessageBox({ message: `Yeni sürüm bulundu (${i.version}), indiriliyor…` }); });
+  autoUpdater.on('update-not-available', () => { if (manualCheck) dialog.showMessageBox({ message: 'Yoni güncel (' + app.getVersion() + ').' }); manualCheck = false; });
+  autoUpdater.on('error', e => { console.error('Güncelleme hatası:', e && e.message); });
+  autoUpdater.on('update-downloaded', i => {
+    dialog.showMessageBox({ type: 'info', buttons: ['Şimdi yeniden başlat', 'Sonra'], defaultId: 0, cancelId: 1,
+      title: 'Güncelleme hazır', message: `Yoni ${i.version} indirildi.`, detail: 'Yeniden başlatınca kurulur.' })
+      .then(r => { if (r.response === 0) { quitting = true; autoUpdater.quitAndInstall(); } });
+  });
+  setTimeout(() => checkUpdates(false), 5000);            // açılıştan kısa süre sonra
+  setInterval(() => checkUpdates(false), 6 * 3600 * 1000); // ve her 6 saatte bir
 }
 
 const SHORTCUTS = {
@@ -63,6 +88,6 @@ app.on('will-quit', () => globalShortcut.unregisterAll());
 app.on('window-all-closed', () => {}); // tepsi sayesinde uygulama açık kalır
 app.on('activate', showMain);
 if (gotLock) app.whenReady().then(async () => {
-  await startServer(); createWindow(); createTray();
+  await startServer(); createWindow(); createTray(); setupUpdater();
   for (const [k, js] of Object.entries(SHORTCUTS)) globalShortcut.register(k, () => run(js));
 }).catch(e => { dialog.showErrorBox('Yoni başlatılamadı', String(e.message || e)); app.quit(); });
