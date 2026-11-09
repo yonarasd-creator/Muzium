@@ -1,4 +1,4 @@
-# 🎵 Müziğim v2
+# 🎵 Yoni v2
 
 
 Kişiselleştirilebilir müzik çalar: hesap/giriş, Discord tarzı profiller, arkadaşlar, anlık mesajlaşma, şarkı paylaşımı ve tamamen özel temalar (arka plan görseli/videosu dahil).

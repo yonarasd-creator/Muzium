@@ -1,4 +1,4 @@
-// Müziğim sunucusu: hesaplar, profiller, arkadaşlar, mesajlar (WebSocket ile anlık). Bağımlılık: express + ws
+// Yoni sunucusu: hesaplar, profiller, arkadaşlar, mesajlar (WebSocket ile anlık). Bağımlılık: express + ws
 const express = require('express'), http = require('http'), path = require('path'), fs = require('fs'), os = require('os'), crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 const PORT = +process.env.PORT || 3000;
@@ -44,7 +44,7 @@ const theme = t => {
   if (t === null) return null; if (typeof t != 'object') throw new Error('Geçersiz tema');
   const o = {}; for (const k of ['a', 'c', 's', 'x']) if (HEX.test(t[k])) o[k] = t[k];
   o.r = num(t.r, 0, 28, 12); o.fs = num(t.fs, 13, 19, 15); o.dim = num(t.dim, 0, 80, 30); o.op = num(t.op, 30, 100, 80); o.bl = num(t.bl, 0, 20, 0);
-  o.m = ['image', 'video'].includes(t.m) ? t.m : ''; o.p = !!t.p; return o;
+  o.m = ['image', 'video'].includes(t.m) ? t.m : ''; o.p = !!t.p; o.lg = typeof t.lg == 'string' && /^[a-z0-9-]{1,30}$/.test(t.lg) ? t.lg : 'varsayilan'; return o;
 };
 const img = (u, k, d) => {
   const v = k == 'avatar' ? 'av' : 'bv';
@@ -169,6 +169,6 @@ server.on('upgrade', (q, sock, head) => {
 setInterval(() => wss.clients.forEach(w => { if (!w.alive) return w.terminate(); w.alive = false; w.ping(); }), 30000).unref();
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Müziğim çalışıyor → http://localhost:${PORT}`);
+  console.log(`Yoni çalışıyor → http://localhost:${PORT}`);
   for (const l of Object.values(os.networkInterfaces()).flat()) if (l.family == 'IPv4' && !l.internal) console.log(`Aynı ağdaki telefon/bilgisayar için → http://${l.address}:${PORT}`);
 });

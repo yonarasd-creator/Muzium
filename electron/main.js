@@ -1,4 +1,4 @@
-// Müziğim masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
+// Yoni masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
 const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dialog } = require('electron');
 const path = require('path'), http = require('http');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
@@ -31,7 +31,7 @@ function createWindow() {
   win.on('close', e => { if (!quitting) { e.preventDefault(); win.hide(); } }); // kapatınca tepsiye iner, müzik sürer
   win.webContents.setWindowOpenHandler(({ url, frameName }) => {
     if (frameName === 'muzigim-mini') return { action: 'allow', overrideBrowserWindowOptions: {
-      width: 360, height: 160, frame: false, alwaysOnTop: true, skipTaskbar: true, autoHideMenuBar: true, backgroundColor: '#1c1c1e', title: 'Müziğim' } };
+      width: 360, height: 160, frame: false, alwaysOnTop: true, skipTaskbar: true, autoHideMenuBar: true, backgroundColor: '#1c1c1e', title: 'Yoni' } };
     if (/^https?:/.test(url)) shell.openExternal(url);
     return { action: 'deny' };
   });
@@ -42,9 +42,9 @@ function createWindow() {
 
 function createTray() {
   tray = new Tray(nativeImage.createFromPath(ICON).resize({ width: 18, height: 18 }));
-  tray.setToolTip('Müziğim');
+  tray.setToolTip('Yoni');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Müziğim’i göster', click: showMain },
+    { label: 'Yoni’yi göster', click: showMain },
     { label: 'Mini oynatıcı (Ctrl+Alt+M)', click: () => run('openMini()') },
     { type: 'separator' }, { label: 'Çık', click: () => app.quit() }]));
   tray.on('click', showMain);
@@ -65,4 +65,4 @@ app.on('activate', showMain);
 if (gotLock) app.whenReady().then(async () => {
   await startServer(); createWindow(); createTray();
   for (const [k, js] of Object.entries(SHORTCUTS)) globalShortcut.register(k, () => run(js));
-}).catch(e => { dialog.showErrorBox('Müziğim başlatılamadı', String(e.message || e)); app.quit(); });
+}).catch(e => { dialog.showErrorBox('Yoni başlatılamadı', String(e.message || e)); app.quit(); });

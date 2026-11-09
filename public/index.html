@@ -2,8 +2,8 @@
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111">
-<title>Müziğim</title>
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg">
+<title>Yoni</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.png"><link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{--bg:#111;--s:#1c1c1e;--t:#f2f2f2;--m:#9a9a9f;--a:#1db6a0}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
@@ -49,7 +49,7 @@ nav{overflow-x:auto}nav button{flex:none;padding:14px 12px}#side{display:none}
  body{display:grid;grid-template-columns:220px minmax(0,1fr) 290px;grid-template-rows:minmax(0,1fr) auto;gap:10px;height:100vh;padding:10px}
  nav,main,#side,#bar{border-radius:var(--r,14px);background:rgba(18,18,20,.74)}
  nav{grid-area:1/1;flex-direction:column;overflow:visible;max-width:none;margin:0;border:0;padding:16px 10px;gap:4px}
- nav::before{content:'🎵 Müziğim';font-weight:700;font-size:19px;padding:4px 14px 18px}
+ nav::before{content:'🎵 Yoni';font-weight:700;font-size:19px;padding:4px 14px 18px}
  nav button{text-align:left;border-radius:10px;padding:11px 14px;border:0!important}nav button.on{background:rgba(255,255,255,.09);color:var(--t)}
  main{grid-area:1/2;max-width:none;margin:0;padding:18px 24px}
  #side{grid-area:1/3;display:flex;flex-direction:column;gap:6px;padding:16px;overflow:auto}#side h4{margin:4px 0}
@@ -111,9 +111,20 @@ nav button:active{transform:scale(.95);background:rgba(255,255,255,.12)}
 .rip{position:absolute;border-radius:50%;background:currentColor;opacity:.3;transform:scale(0);animation:rip .55s ease-out forwards;pointer-events:none}
 @keyframes rip{to{transform:scale(1);opacity:0}}
 @media (prefers-reduced-motion:reduce){button,.btn,.chip,.ic,.pl,.row{transition:none}button:active,.btn:active,.chip:active,.ic:active,.pl:active,#pp:active,nav button:active{transform:none}.rip{display:none}}
+
+.tb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.btn.sm{padding:6px 11px;font-size:13px}
+.lrow{padding:6px 8px;border:0;border-radius:8px;cursor:pointer}.lrow:hover{background:rgba(255,255,255,.07)}.lrow img,.lrow .ph{width:48px;height:48px;border-radius:6px}
+.lh{display:flex;gap:16px;align-items:flex-end;margin:6px 0 14px}.lc{width:160px;height:160px;border-radius:var(--r,12px);object-fit:cover;background:#2a2a2c;flex:none;box-shadow:0 8px 24px #0006}
+.lt{min-width:0}.lt h2{margin:4px 0 6px;font-size:clamp(22px,4vw,34px);overflow-wrap:anywhere}.lt small{color:var(--m)}.lb{margin:0 0 6px;color:var(--m);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.la{display:flex;align-items:center;gap:6px;margin:0 0 10px}.pl2{width:52px;height:52px;border-radius:50%;border:0;background:var(--a);color:#000;font-size:22px;margin-right:6px;cursor:pointer}
+.cpt{counter-reset:n}.cpt .row{padding:4px 8px;border:0;border-radius:8px;gap:12px}.cpt .row::before{counter-increment:n;content:counter(n);width:22px;text-align:center;color:var(--m);font-size:13px;flex:none}
+.cpt .row img,.cpt .row .ph{width:38px;height:38px}.cpt .row .i b{font-size:14px}.cpt .row small{font-size:12px}.cpt .row:hover{background:rgba(255,255,255,.07)}
+@media (hover:hover){.cpt .row .ic{opacity:0}.cpt .row:hover .ic,.cpt .row .ic.ok{opacity:1}}
+@media (max-width:560px){.lc{width:110px;height:110px}}
+.sbl a{display:flex;align-items:center;gap:8px}.sbl a img{width:30px;height:30px;border-radius:5px;object-fit:cover;flex:none}.sbl a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style></head><body>
 <div id="bg"><i></i></div><div id="auth" hidden></div>
-<header id="top"><input id="tq" type="text" placeholder="Şarkı, sanatçı ara…"><button class="ic" id="tm" title="Mini oynatıcı (Alt+M)">🗗</button><button class="ic" id="tg">⚙</button><img id="tav" alt=""></header>
+<header id="top"><img id="brand" alt="" style="width:28px;height:28px;border-radius:6px;margin-right:auto"><input id="tq" type="text" placeholder="Şarkı, sanatçı ara…"><button class="ic" id="tm" title="Mini oynatıcı (Alt+M)">🗗</button><button class="ic" id="tg">⚙</button><img id="tav" alt=""></header>
 <nav><button data-v="home" class="on">🏠 Ana Sayfa</button><button data-v="ara">🔍 Ara</button><button data-v="list">🎵 Liste</button><button data-v="soc">💬 Sosyal</button><button data-v="imp">📥 Aktar</button><button data-v="thm">🎨 Tema</button><button data-v="me">👤 Profil</button><div id="sbx"></div></nav>
 <main id="m"></main>
 <div id="bar"><div id="pg"><i></i></div>
@@ -307,7 +318,7 @@ const getTs=async l=>(await Promise.all(l.ids.map(i=>get('tracks',i)))).filter(B
 async function vHome(){
  const ls=(await all('lists')).filter(l=>l.ids.length&&l.id!='recent'),rec=await get('lists','recent'),lkd=await get('lists','liked'),hr=new Date().getHours(),
   g=hr<5?'İyi geceler':hr<12?'Günaydın':hr<18?'İyi günler':'İyi akşamlar',dl=ls.length?ls[new Date().getDate()%ls.length]:null,
-  cov=async l=>(l.ids[0]&&(await get('tracks',l.ids[0]))?.art)||'',tile=(l,c)=>`<div class="tile" data-id="${esc(l.id)}"><div class="cv"${c?` style="background-image:url('${esc(c)}')"`:''}></div><b>${esc(l.name)}</b><small>${l.ids.length} şarkı</small></div>`;
+  cov=async l=>l.cover||(l.ids[0]&&(await get('tracks',l.ids[0]))?.art)||'',tile=(l,c)=>`<div class="tile" data-id="${esc(l.id)}"><div class="cv"${c?` style="background-image:url('${esc(c)}')"`:''}></div><b>${esc(l.name)}</b><small>${l.ids.length} şarkı</small></div>`;
  const wk=ls.filter(l=>l!==dl).slice(0,4),wc=await Promise.all(wk.map(cov)),dc=dl?await cov(dl):'',mix=(rec?await getTs(rec):[]).slice(0,7),
   pt=+lsGet('pt')||0,nt=(await keys('tracks')).length,tt=pt>=3600?(pt/3600).toFixed(1)+' sa':Math.round(pt/60)+' dk';
  M.innerHTML=`<h2 style="margin:0 0 14px">${g}${ME?', '+esc(ME.display):''} 👋</h2>
@@ -321,8 +332,8 @@ async function vHome(){
  $('#hk').onclick=()=>{show('ara');setTimeout(()=>$('#gs')&&$('#gs').click(),300)};
  $('#mx').onclick=async e=>{const r=e.target.closest('.row');if(!r)return;const t=mix[+r.dataset.i];
   if(e.target.closest('[data-a=lk]')){const l=lkd||{id:'liked',name:'❤ Beğenilenler',ids:[]};if(l.ids.includes(t.id)){l.ids=l.ids.filter(x=>x!=t.id);await put('lists',l)}else await addTo(l,[t]);vHome()}else play(mix,+r.dataset.i)}}
-async function renderSbx(){const el=$('#sbx');if(!el)return;const ls=(await all('lists')).filter(l=>l.id!='recent'),rec=await get('lists','recent'),lkd=await get('lists','liked'),rt=rec?(await getTs(rec)).slice(0,6):[];
- el.innerHTML=`<h4>Listelerim</h4><div class="sbl">${ls.slice(0,6).map(l=>`<a data-l="${esc(l.id)}">${esc(l.name)}</a>`).join('')||'<small class="muted" style="padding:0 10px">Henüz liste yok</small>'}</div><h4>Son çalınanlar</h4>${rt.map((t,i)=>`<div class="row" data-r="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${lkd?.ids.includes(t.id)?'❤️':''}</small></div>`).join('')}`;
+async function renderSbx(){const el=$('#sbx');if(!el)return;const ls=(await all('lists')).filter(l=>l.id!='recent'),rec=await get('lists','recent'),lkd=await get('lists','liked'),rt=rec?(await getTs(rec)).slice(0,6):[],sc=await Promise.all(ls.slice(0,6).map(coverOf));
+ el.innerHTML=`<h4>Listelerim</h4><div class="sbl">${ls.slice(0,6).map((l,i)=>`<a data-l="${esc(l.id)}"><img src="${esc(sc[i]||PH)}"><span>${esc(l.name)}</span></a>`).join('')||'<small class="muted" style="padding:0 10px">Henüz liste yok</small>'}</div><h4>Son çalınanlar</h4>${rt.map((t,i)=>`<div class="row" data-r="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${lkd?.ids.includes(t.id)?'❤️':''}</small></div>`).join('')}`;
  el.onclick=e=>{const a=e.target.closest('[data-l]');if(a){show.keep=a.dataset.l;return show('list')}const r=e.target.closest('[data-r]');if(r)play(rt,+r.dataset.r)}}
 const renderTop=()=>{$('#tav').src=(ME&&ME.avatar)||PH;renderSbx()};
 $('#tq').onkeydown=e=>{if(e.key!='Enter')return;lastQ=e.target.value.trim();genre='';e.target.value='';show('ara');setTimeout(()=>{const q=$('#q');if(q){q.value=lastQ;q.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}))}},250)};
@@ -335,7 +346,7 @@ async function openMini(){
  if(mw){mw.close();return}
  const pop=()=>window.open('','muzigim-mini','popup,width=360,height=160');try{mw=window.documentPictureInPicture&&!/Electron/.test(navigator.userAgent)?await documentPictureInPicture.requestWindow({width:360,height:160}):pop()}catch{try{mw=pop()}catch{mw=null}}
  if(!mw){toast('Mini oynatıcı açılamadı (açılır pencere engelli olabilir)');return}
- const d=mw.document,cs=getComputedStyle(document.documentElement),q=id=>d.getElementById(id);d.title='Müziğim';
+ const d=mw.document,cs=getComputedStyle(document.documentElement),q=id=>d.getElementById(id);d.title='Yoni';
  d.head.innerHTML='<meta charset="utf-8"><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;font:13px system-ui,sans-serif;color:var(--t,#f2f2f2);background:linear-gradient(160deg,color-mix(in srgb,var(--a,#1db6a0) 24%,var(--s,#1c1c1e)),var(--s,#1c1c1e) 70%);height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:10px;gap:8px;user-select:none}.top{display:flex;align-items:center;gap:10px;-webkit-app-region:drag}#ma{width:48px;height:48px;border-radius:10px;object-fit:cover;flex:none}.nm{flex:1;min-width:0}.nm b,.nm small,.r b,.r small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm small,.r small,.tm{color:var(--m,#999)}button,input{-webkit-app-region:no-drag}button{background:none;border:0;color:inherit;font-size:18px;padding:5px 9px;border-radius:50%;cursor:pointer}button{transition:transform .14s cubic-bezier(.3,1.4,.5,1),background-color .15s}button:hover{background:#ffffff18}button:active{transform:scale(.85);background:#ffffff30}#mpp{background:#fff;color:#000;width:40px;height:40px}input{width:100%;accent-color:var(--a,#1db6a0);margin:0}.ct{display:flex;justify-content:center;align-items:center;gap:6px}.tm{display:flex;justify-content:space-between;font-size:11px}#mq{display:none;flex:1;overflow:auto;border-top:1px solid #ffffff22;padding-top:6px}.x #mq{display:block}.x .top{flex-direction:column;text-align:center}.x #ma{width:170px;height:170px;border-radius:16px}.x .nm{width:100%}.r{padding:6px 8px;border-radius:8px;cursor:pointer}.r:hover{background:#ffffff14}.r.c b{color:var(--a,#1db6a0)}</style>';d.body.innerHTML=`<div class="top"><img id="ma" alt=""><div class="nm"><b id="mt">—</b><small id="mr"></small></div><button id="mx" title="Genişlet (E)">⤢</button><button id="mz" title="Kapat">✕</button></div>
 <div><input type="range" id="mk" min="0" max="1000" value="0"><div class="tm"><span id="mc">0:00</span><span id="md">0:00</span></div></div>
 <div class="ct"><button id="ml">🤍</button><button id="mv">⏮</button><button id="mpp">▶</button><button id="mn">⏭</button></div><div id="mq"></div>`;
@@ -360,29 +371,48 @@ $('#tm').onclick=openMini;addEventListener('keydown',e=>{if(e.altKey&&e.code=='K
 function renderSide(){renderSbx();const t=cT();if(!t)return;$('#sa').src=t.art||PH;$('#st').textContent=t.title;$('#sar').textContent=t.artist;
  $('#sq').innerHTML=queue.slice(idx+1,idx+6).map((x,i)=>`<div class="row" data-i="${idx+1+i}">${x.art?`<img src="${esc(x.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small></div></div>`).join('')||'<p class="muted">Sırada başka şarkı yok</p>'}
 $('#sq').onclick=e=>{const r=e.target.closest('.row');r&&play(queue,+r.dataset.i)};
+async function coverOf(l){return l.cover||(l.ids[0]&&(await get('tracks',l.ids[0]))?.art)||''}
 async function vList(){
  if(cur)return vOne();
- const ls=await all('lists');
- M.innerHTML=(ls.map(l=>`<div class="card" data-id="${l.id}" style="cursor:pointer"><b>${esc(l.name)}</b><br><small class="muted">${l.ids.length} şarkı</small></div>`).join('')||'<p class="muted">Henüz liste yok. Arama’dan ＋ ile ekle veya İçe Aktar’ı kullan.</p>')+
- `<button class="btn g" id="lf">📁 Cihazdaki müzik dosyalarını ekle</button><input type="file" id="fi" accept="audio/*" multiple hidden>`;
- M.querySelectorAll('.card').forEach(c=>c.onclick=()=>{cur=c.dataset.id;vOne()});
+ const ls=await all('lists'),cv=await Promise.all(ls.map(coverOf));
+ M.innerHTML=`<div class="tb"><b style="font-size:18px">Kitaplığın</b><span><button class="btn sm" id="nl">＋ Yeni liste</button> <button class="btn g sm" id="lf">📁 Dosya ekle</button></span></div>`+
+  (ls.map((l,i)=>`<div class="row lrow" data-id="${esc(l.id)}"><img src="${esc(cv[i]||PH)}"><div class="i"><b>${esc(l.name)}</b><small>Liste · ${l.ids.length} şarkı${l.bio?' · '+esc(l.bio):''}</small></div></div>`).join('')||'<p class="muted">Henüz liste yok. Arama’dan ＋ ile ekle veya İçe Aktar’ı kullan.</p>')+
+  `<input type="file" id="fi" accept="audio/*" multiple hidden>`;
+ M.querySelectorAll('.lrow').forEach(c=>c.onclick=()=>{cur=c.dataset.id;vOne()});
+ $('#nl').onclick=async()=>{const n=(prompt('Yeni liste adı')||'').trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);renderSbx();cur=l.id;vOne()};
  $('#lf').onclick=()=>$('#fi').click();
  $('#fi').onchange=async e=>{const l=await pick();if(!l)return;const ts=[];let n=0;
   for(const f of e.target.files){const id='l'+Date.now()+(n++);await put('blobs',{id,blob:f});ts.push({id,title:f.name.replace(/\.[^.]+$/,''),artist:'Cihazım',art:''})}
   await addTo(l,ts);toast(ts.length+' dosya eklendi');vList()};
 }
+function editList(l){
+ const d=$('#dlg');let cover=l.cover||'';
+ d.innerHTML=`<b>Listeyi düzenle</b>
+ <div style="display:flex;gap:12px;align-items:center;margin:12px 0"><img id="lec" class="lc" style="width:96px;height:96px" src="${esc(cover||PH)}"><div><button class="btn g sm" id="lep">🖼 Kapak seç</button> <button class="btn g sm" id="ler">Kaldır</button></div></div>
+ <input type="text" id="len" maxlength="60" placeholder="Liste adı" value="${esc(l.name)}"><textarea id="leb" rows="3" maxlength="300" placeholder="Liste hakkında kısa bir yazı (bio)">${esc(l.bio||'')}</textarea>
+ <input type="file" id="lef" accept="image/*" hidden><button class="btn" id="les">Kaydet</button> <button class="btn g" id="lex">İptal</button>`;
+ d.showModal();
+ $('#lep').onclick=()=>$('#lef').click();
+ $('#lef').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const b=await toBlob(f,480);cover=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});$('#lec').src=cover}catch{toast('Görsel okunamadı')}};
+ $('#ler').onclick=()=>{cover='';$('#lec').src=PH};
+ $('#lex').onclick=()=>d.close();
+ $('#les').onclick=async()=>{const n=$('#len').value.trim();if(n)l.name=n;l.bio=$('#leb').value.trim();if(cover)l.cover=cover;else delete l.cover;
+  await put('lists',l);d.close();renderSbx();vOne()};
+}
 async function vOne(){
  const l=await get('lists',cur),off=new Set(await keys('blobs'));
  curList=(await Promise.all(l.ids.map(id=>get('tracks',id)))).filter(Boolean);
- const nOff=curList.filter(t=>off.has(t.id)).length;
- M.innerHTML=`<button class="btn g" id="bk">← Geri</button> <h2 style="margin:10px 0 2px">${esc(l.name)}</h2><p class="muted" style="margin:0 0 10px">${curList.length} şarkı · ${nOff} çevrimdışı hazır</p>
- <button class="btn" id="pa">▶ Çal</button> <button class="btn g" id="da">⬇ Hepsini indir</button> <button class="btn g" id="rn">✎ Adı değiştir</button> <button class="btn g" id="dl">🗑 Listeyi sil</button>
- <div id="r" style="margin-top:8px">${curList.map((t,i)=>rowHTML(t,i,off.has(t.id),'<button class="ic" data-a="sh">↗</button><button class="ic" data-a="rm">✕</button>')).join('')}</div>`;
+ const nOff=curList.filter(t=>off.has(t.id)).length,cv=await coverOf(l);
+ M.innerHTML=`<button class="ic" id="bk" title="Geri">←</button>
+ <div class="lh"><img class="lc" src="${esc(cv||PH)}"><div class="lt"><small>LİSTE</small><h2>${esc(l.name)}</h2>${l.bio?`<p class="lb">${esc(l.bio)}</p>`:''}<small>${curList.length} şarkı · ${nOff} çevrimdışı hazır</small></div></div>
+ <div class="la"><button class="pl2" id="pa" title="Çal">▶</button><button class="ic" id="da" title="Hepsini indir">⬇</button><button class="ic" id="rn" title="Kapak, ad ve bio düzenle">✎</button><button class="ic" id="dl" title="Listeyi sil">🗑</button></div>
+ <div id="r" class="cpt">${curList.map((t,i)=>rowHTML(t,i,off.has(t.id),'<button class="ic" data-a="sh">↗</button><button class="ic" data-a="rm">✕</button>')).join('')}</div>`;
  $('#bk').onclick=()=>{cur=null;vList()};
- $('#rn').onclick=async()=>{const n=prompt('Yeni ad',l.name);if(n&&n.trim()){l.name=n.trim();await put('lists',l);vOne()}};
+ $('#rn').onclick=()=>editList(l);
  $('#pa').onclick=()=>curList.length&&play(curList,0);
  $('#da').onclick=async()=>{for(const t of curList)if((t.aid||t.url)&&!off.has(t.id))await download(t);vOne()};
- $('#dl').onclick=async()=>{if(confirm('Liste silinsin mi? (indirilen dosyalar kalır)')){await del('lists',cur);cur=null;vList()}};
+ $('#dl').onclick=async()=>{if(confirm('Liste silinsin mi? (indirilen dosyalar kalır)')){await del('lists',cur);cur=null;renderSbx();vList()}};
  $('#r').onclick=async e=>{const row=e.target.closest('.row');if(!row)return;const t=curList[row.dataset.i],a=e.target.closest('[data-a]')?.dataset.a;
   if(a=='play')play(curList,+row.dataset.i);
   if(a=='sh')shareTrack(t);if(a=='dl'){await download(t);vOne()}
@@ -402,7 +432,7 @@ async function boot(){
 function start(){$('#auth').hidden=true;if(ME&&!offline){connectWS();loadFR()}renderTop();show('home')}
 function showAuth(){
  const a=$('#auth');a.hidden=false;let reg=false;
- const draw=()=>{a.innerHTML=`<div class="card" style="width:min(92vw,360px)"><h2 style="margin:0 0 4px">🎵 Müziğim</h2><p class="muted" style="margin:0 0 12px">${reg?'Hesap oluştur':'Giriş yap'}</p>
+ const draw=()=>{a.innerHTML=`<div class="card" style="width:min(92vw,360px)"><h2 style="margin:0 0 4px">🎵 Yoni</h2><p class="muted" style="margin:0 0 12px">${reg?'Hesap oluştur':'Giriş yap'}</p>
  <input type="text" id="lu" placeholder="Kullanıcı adı" autocapitalize="off" autocomplete="username"><input type="password" id="lp" placeholder="Şifre" autocomplete="${reg?'new-password':'current-password'}">
  <button class="btn" id="go" style="width:100%">${reg?'Kayıt ol':'Giriş yap'}</button><p id="er" style="color:#f66;min-height:1.2em;margin:8px 0"></p>
  <a href="#" id="sw" style="color:var(--a)">${reg?'Zaten hesabım var':'Hesap oluştur'}</a><br><br><button class="btn g" id="of" style="width:100%">Hesapsız devam et</button></div>`;
@@ -484,14 +514,17 @@ function vMe(){
 
 // ================= Tema sistemi =================
 const PRE=[{n:'Gece',t:{a:'#1db6a0',c:'#111111',s:'#1c1c1e',x:'#f2f2f2'}},{n:'Mor',t:{a:'#a78bfa',c:'#14101f',s:'#211a33',x:'#f1ecff'}},{n:'Okyanus',t:{a:'#38bdf8',c:'#0b1622',s:'#12263a',x:'#e8f4ff'}},{n:'Gün batımı',t:{a:'#fb923c',c:'#1a1210',s:'#2a1c18',x:'#fff1e8'}},{n:'Açık',t:{a:'#0d9488',c:'#f4f4f5',s:'#ffffff',x:'#18181b'}},{n:'Siyah',t:{a:'#ffffff',c:'#000000',s:'#141414',x:'#ffffff'}},{n:'Muify',t:{a:'#f59e0b',c:'#150c24',s:'#2a1a44',x:'#f6efff'}}];
-const DT={...PRE[0].t,r:12,fs:15,dim:30,op:80,bl:0,m:'',p:false};let TH={...DT},bgUrl=null,raf=0,sy=0;
+// Yeni logo eklemek için dosyayı public/logos/ klasörüne koy, buraya bir satır ekle: {id:'benim',f:'logos/dosya.png'}
+const LOGOS=[{id:'varsayilan',f:'icon.png'},{id:'logo-1',f:'logos/logo-1.png'},{id:'logo-2',f:'logos/logo-2.png'},{id:'logo-3',f:'logos/logo-3.png'},{id:'logo-4',f:'logos/logo-4.png'},{id:'logo-5',f:'logos/logo-5.png'},{id:'logo-6',f:'logos/logo-6.png'},{id:'logo-7',f:'logos/logo-7.png'}];
+function applyLogo(th){const L=LOGOS.find(l=>l.id==th.lg)||LOGOS[0];const ic=document.querySelector('link[rel=icon]'),ap=document.querySelector('link[rel=apple-touch-icon]'),b=document.getElementById('brand');ic&&(ic.href=L.f);ap&&(ap.href=L.f);b&&(b.src=L.f)}
+const DT={...PRE[0].t,r:12,fs:15,dim:30,op:80,bl:0,m:'',p:false,lg:'varsayilan'};let TH={...DT},bgUrl=null,raf=0,sy=0;
 const HEXR=/^#[0-9a-f]{6}$/i;
 function applyVars(th){
  const R=document.documentElement,st=R.style,op=th.m?th.op:100;
  st.setProperty('--a',th.a);st.setProperty('--bg',th.c);st.setProperty('--bgs',th.c);st.setProperty('--t',th.x);
  st.setProperty('--s',`color-mix(in srgb, ${th.s} ${op}%, transparent)`);st.setProperty('--m',`color-mix(in srgb, ${th.x} 55%, ${th.c})`);
  st.setProperty('--r',th.r+'px');st.setProperty('--fs',th.fs+'px');st.setProperty('--dim',th.dim/100);st.setProperty('--bl',th.bl+'px');
- R.classList.toggle('bl',th.bl>0);document.querySelector('meta[name=theme-color]').content=th.c}
+ R.classList.toggle('bl',th.bl>0);document.querySelector('meta[name=theme-color]').content=th.c;applyLogo(th)}
 async function setBg(th){
  const bg=$('#bg');bg.innerHTML='<i></i>';if(bgUrl){URL.revokeObjectURL(bgUrl);bgUrl=null}
  if(!th.m)return;const b=await get('blobs','bg:media');if(!b){TH.m='';applyVars(TH);return}
@@ -507,6 +540,7 @@ async function toBlob(f,max){const b=await createImageBitmap(f),k=Math.min(1,max
 function vTheme(){
  const c=(k,l)=>`<label class="f">${l}<input type="color" data-k="${k}" value="${TH[k]}"></label>`,r=(k,l,a,b)=>`<label class="f">${l}<input type="range" data-k="${k}" min="${a}" max="${b}" value="${TH[k]}"></label>`;
  M.innerHTML=`<div id="tc"><h4 style="margin-top:0">Hazır temalar</h4><div class="chips">${PRE.map((p,i)=>`<button class="chip" data-p="${i}" style="border-left:14px solid ${p.t.a}">${p.n}</button>`).join('')}</div>
+ <h4>Logo</h4><div class="chips">${LOGOS.map(l=>`<button class="chip" data-lg="${l.id}" aria-label="Logo" style="padding:4px;display:inline-flex${TH.lg==l.id?';outline:2px solid var(--a)':''}"><img src="${l.f}" alt="" style="width:44px;height:44px;border-radius:8px;display:block"></button>`).join('')}</div>
  <h4>Renkler</h4>${c('a','Vurgu rengi')}${c('c','Arka plan')}${c('s','Kart / panel')}${c('x','Yazı')}
  <h4>Görünüm</h4>${r('r','Köşe yuvarlaklığı',0,28)}${r('fs','Yazı boyutu',13,19)}
  <h4>Arka plan görseli / videosu</h4><button class="btn g" id="bu">📷 Görsel veya video seç</button> <button class="btn g" id="br">Kaldır</button><input type="file" id="bf" accept="image/*,video/mp4,video/webm" hidden>
@@ -518,13 +552,13 @@ function vTheme(){
  tc.oninput=e=>{const k=e.target.dataset.k;if(!k)return;TH[k]=e.target.type=='checkbox'?e.target.checked:e.target.type=='range'?+e.target.value:e.target.value;
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{applyVars(TH);const v=$('#bg video');v&&vidPlay(v)})};
  tc.onchange=e=>{if(e.target.dataset.k)saveTheme()};
- tc.onclick=e=>{const p=e.target.closest('[data-p]');if(p){Object.assign(TH,PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
+ tc.onclick=e=>{const lg=e.target.closest('[data-lg]');if(lg){TH.lg=lg.dataset.lg;applyLogo(TH);saveTheme();vTheme();return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
  $('#bu').onclick=()=>$('#bf').click();
  $('#bf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   try{let blob=f,m='image';if(f.type.startsWith('video')){m='video';if(f.size>40e6)return toast('Video en fazla 40 MB olmalı (akıcılık için)')}else blob=await toBlob(f,1920);
    await put('blobs',{id:'bg:media',blob});TH.m=m;await setBg(TH);applyVars(TH);saveTheme();toast('Arka plan ayarlandı ✓')}catch{toast('Dosya okunamadı')}};
  $('#br').onclick=async()=>{await del('blobs','bg:media');TH.m='';await setBg(TH);applyVars(TH);saveTheme()};
- $('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...TH,m:''})],{type:'application/json'}));a.download='muzigim-tema.json';a.click()};
+ $('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...TH,m:''})],{type:'application/json'}));a.download='yoni-tema.json';a.click()};
  $('#im').onclick=()=>$('#tf').click();
  $('#tf').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());for(const k of Object.keys(DT)){if(k=='m'||!(k in j))continue;if(['a','c','s','x'].includes(k)?HEXR.test(j[k]):typeof j[k]==typeof DT[k])TH[k]=j[k]}applyVars(TH);saveTheme();vTheme();toast('Tema yüklendi ✓')}catch{toast('Geçersiz tema dosyası')}}}
 
