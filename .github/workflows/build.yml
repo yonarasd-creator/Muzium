@@ -20,3 +20,20 @@ jobs:
       - run: npx electron-builder --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Discord'a duyur
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "DISCORD_WEBHOOK tanımlı değil, duyuru atlandı"; exit 0; fi
+          export BODY="$(gh api repos/$REPO/releases/tags/$TAG --jq .body || true)"
+          node -e '
+            const t=process.env.TAG, r=process.env.REPO, b=(process.env.BODY||"").trim().slice(0,1200);
+            const d="Uygulamayı açınca güncelleme **kendiliğinden** gelir (sistem tepsisi → *Güncellemeleri denetle*).\nYeni kurulum dosyası: Releases sayfasındaki `Yoni-Kurulum-"+t.replace(/^v/,"")+".exe`"+(b?"\n\n"+b:"");
+            process.stdout.write(JSON.stringify({username:"Yoni Güncellemeler",embeds:[{title:"🎉 Yoni "+t+" yayınlandı",url:"https://github.com/"+r+"/releases/tag/"+t,description:d,color:0x1db9a6}]}));
+          ' > payload.json
+          curl -sS -f -H "Content-Type: application/json" -d @payload.json "$WEBHOOK" || echo "Discord duyurusu gönderilemedi (derleme etkilenmez)"
