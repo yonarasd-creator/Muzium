@@ -60,3 +60,7 @@ Sunucuyu bir bilgisayarda/VPS'te çalıştır ve **HTTPS** arkasına koy (Caddy,
 ## Hazır indirmek icin (Exe dosyası)
  <img width="223" height="142" alt="image" src="https://github.com/user-attachments/assets/0ff0e589-396f-4c4e-93c1-d6b7e6a6df98" /> 
  girdikten sonra exe dosyasını indrip kurun guncellemlerı denetleyerek guncel halde kullanbılrısnız
+
+## Otomatik güncelleme
+Kurulu masaüstü uygulaması açılışta ve her 6 saatte bir GitHub Releases'i denetler; yeni sürüm varsa indirir ve "Şimdi yeniden başlat" diye sorar. Elle denetlemek için sistem tepsisi menüsünde **Güncellemeleri denetle**.
+Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır → GitHub'da `v<sürüm>` etiketiyle Release oluştur (örn. `v2.1.0`); derleme otomatik yapılır.
