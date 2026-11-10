@@ -140,6 +140,7 @@ nav button:active{transform:scale(.95);background:rgba(255,255,255,.12)}
 </style></head><body>
 <div id="bg"><i></i></div><div id="auth" hidden></div>
 <script src="anma.js"></script>
+<script src="kedi.js"></script>
 <header id="top"><img id="brand" alt="" style="width:28px;height:28px;border-radius:6px;margin-right:auto"><input id="tq" type="text" placeholder="Şarkı, sanatçı ara…"><button class="ic" id="tm" title="Mini oynatıcı (Alt+M)">🗗</button><button class="ic" id="tg">⚙</button><img id="tav" alt=""></header>
 <nav><button data-v="home" class="on">🏠 Ana Sayfa</button><button data-v="ara">🔍 Ara</button><button data-v="list">🎵 Liste</button><button data-v="soc">💬 Sosyal</button><button data-v="imp">📥 Aktar</button><button data-v="thm">🎨 Tema</button><button data-v="me">👤 Profil</button><div id="sbx"></div></nav>
 <main id="m"></main>
@@ -552,14 +553,14 @@ function openLogo(id){
  o.onclick=e=>{if(e.target===o)return close();const n=e.target.closest('.lgn');if(n)return go(+n.dataset.d);if(e.target.closest('.lgx'))return close();if(e.target.closest('.lgs'))pick()};
  show();sb.focus();
 }
-const DT={...PRE[0].t,r:12,fs:15,dim:30,op:80,bl:0,m:'',p:false,lg:'varsayilan'};let TH={...DT},bgUrl=null,raf=0,sy=0;
+const DT={...PRE[0].t,r:12,fs:15,dim:30,op:80,bl:0,m:'',p:false,lg:'varsayilan',kd:true,kl:['zencefil']};let TH={...DT},bgUrl=null,raf=0,sy=0;
 const HEXR=/^#[0-9a-f]{6}$/i;
 function applyVars(th){
  const R=document.documentElement,st=R.style,op=th.m?th.op:100;
  st.setProperty('--a',th.a);st.setProperty('--bg',th.c);st.setProperty('--bgs',th.c);st.setProperty('--t',th.x);
  st.setProperty('--s',`color-mix(in srgb, ${th.s} ${op}%, transparent)`);st.setProperty('--m',`color-mix(in srgb, ${th.x} 55%, ${th.c})`);
  st.setProperty('--r',th.r+'px');st.setProperty('--fs',th.fs+'px');st.setProperty('--dim',th.dim/100);st.setProperty('--bl',th.bl+'px');
- R.classList.toggle('bl',th.bl>0);document.querySelector('meta[name=theme-color]').content=th.c;applyLogo(th)}
+ R.classList.toggle('bl',th.bl>0);document.querySelector('meta[name=theme-color]').content=th.c;applyLogo(th);window.Kedi&&Kedi.sync(th)}
 async function setBg(th){
  const bg=$('#bg');bg.innerHTML='<i></i>';if(bgUrl){URL.revokeObjectURL(bgUrl);bgUrl=null}
  if(!th.m)return;const b=await get('blobs','bg:media');if(!b){TH.m='';applyVars(TH);return}
@@ -576,6 +577,9 @@ function vTheme(){
  const c=(k,l)=>`<label class="f">${l}<input type="color" data-k="${k}" value="${TH[k]}"></label>`,r=(k,l,a,b)=>`<label class="f">${l}<input type="range" data-k="${k}" min="${a}" max="${b}" value="${TH[k]}"></label>`;
  M.innerHTML=`<div id="tc"><h4 style="margin-top:0">Hazır temalar</h4><div class="chips">${PRE.map((p,i)=>`<button class="chip" data-p="${i}" style="border-left:14px solid ${p.t.a}">${p.n}</button>`).join('')}</div>
  <h4>Logo</h4><div class="chips">${LOGOS.map(l=>`<button class="chip" data-lg="${l.id}" aria-label="Logo" style="padding:4px;display:inline-flex${TH.lg==l.id?';outline:2px solid var(--a)':''}"><img src="${l.f}" alt="" style="width:64px;height:64px;border-radius:10px;display:block"></button>`).join('')}</div>
+ <h4>Kediler 🐱</h4><label class="f">Kedileri göster<input type="checkbox" data-k="kd" ${TH.kd!==false?'checked':''}></label>
+ <div class="chips">${(()=>{const KL=TH.kl&&TH.kl.length?TH.kl:['zencefil'];return Kedi.types.map(([id,n])=>`<button class="chip" data-cat="${id}" aria-pressed="${KL.includes(id)}" title="${n}" style="padding:5px 6px;display:inline-flex;flex-direction:column;align-items:center;gap:2px${KL.includes(id)?';outline:2px solid var(--a)':''}"><span style="width:56px;height:56px;display:block;image-rendering:pixelated;background:url(kedi/${id}.png) 0 0/504px 56px no-repeat"></span><small>${n}</small></button>`).join('')})()}</div>
+ <p class="muted" style="font-size:13px">En fazla 3 kedi seçebilirsin. Üzerine gelince sevebilirsin 💗 Kediler tıklamanı engellemez. <button class="btn g" id="kfare" style="margin-left:4px">🐭 Fare çıkar</button></p>
  <h4>Renkler</h4>${c('a','Vurgu rengi')}${c('c','Arka plan')}${c('s','Kart / panel')}${c('x','Yazı')}
  <h4>Görünüm</h4>${r('r','Köşe yuvarlaklığı',0,28)}${r('fs','Yazı boyutu',13,19)}
  <h4>Arka plan görseli / videosu</h4><button class="btn g" id="bu">📷 Görsel veya video seç</button> <button class="btn g" id="br">Kaldır</button><input type="file" id="bf" accept="image/*,video/mp4,video/webm" hidden>
@@ -587,7 +591,7 @@ function vTheme(){
  tc.oninput=e=>{const k=e.target.dataset.k;if(!k)return;TH[k]=e.target.type=='checkbox'?e.target.checked:e.target.type=='range'?+e.target.value:e.target.value;
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{applyVars(TH);const v=$('#bg video');v&&vidPlay(v)})};
  tc.onchange=e=>{if(e.target.dataset.k)saveTheme()};
- tc.onclick=e=>{const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
+ tc.onclick=e=>{if(e.target.closest('#kfare')){Kedi.mouse();return}const ct=e.target.closest('[data-cat]');if(ct){const id=ct.dataset.cat;let l=TH.kl&&TH.kl.length?[...TH.kl]:['zencefil'];if(l.includes(id)){if(l.length>1)l=l.filter(x=>x!=id)}else{if(l.length>=Kedi.max)l.shift();l.push(id)}TH.kl=l;if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();return}const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
  $('#bu').onclick=()=>$('#bf').click();
  $('#bf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   try{let blob=f,m='image';if(f.type.startsWith('video')){m='video';if(f.size>40e6)return toast('Video en fazla 40 MB olmalı (akıcılık için)')}else blob=await toBlob(f,1920);
