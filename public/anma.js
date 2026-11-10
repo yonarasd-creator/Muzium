@@ -4,7 +4,7 @@
   const q = new URLSearchParams(location.search), now = new Date(), force = q.has('anma');
   if (!force && !(now.getMonth() === 10 && now.getDate() === 10)) return;
   try { if (!force && sessionStorage.getItem('anma10')) return; sessionStorage.setItem('anma10', '1'); } catch {}
-  const WAIT = 5, yil = Math.max(now.getFullYear() - 1938, 1);
+  const WAIT = 5;
 
   const st = document.createElement('style');
   st.textContent = `
@@ -17,9 +17,10 @@
 #anma video{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 18px 70px rgba(0,0,0,.75);
  opacity:0;transform:scale(.97);animation:an-vid 1.6s .5s ease forwards;background:#000}
 #anma .an-txt{position:relative;text-align:center;padding:16px 20px 6px;opacity:0;transform:translateY(10px);animation:an-txt 1.4s 1.3s ease forwards}
-#anma h1{margin:0;font-weight:400;font-size:clamp(20px,3.4vw,32px);letter-spacing:.04em}
-#anma p{margin:6px 0 0;font:13px/1.4 system-ui,sans-serif;letter-spacing:.14em;color:#c9c4b8;text-transform:uppercase}
-#anma .an-line{width:56px;height:2px;background:#e30a17;margin:12px auto 0;border-radius:2px;transform:scaleX(0);animation:an-line 1s 1.9s ease forwards}
+#anma h1{margin:0;font-weight:400;font-size:clamp(22px,3.6vw,34px);letter-spacing:.05em}
+#anma p{margin:10px auto 0;max-width:640px;font:clamp(13px,1.7vw,16px)/1.6 Georgia,'Times New Roman',serif;color:#d9d4c8}
+#anma .an-sig{margin:12px 0 0;font:italic clamp(12px,1.5vw,14px)/1.4 Georgia,serif;letter-spacing:.06em;color:#a9a496}
+#anma .an-line{width:56px;height:2px;background:#e30a17;margin:14px auto 0;border-radius:2px;transform:scaleX(0);animation:an-line 1s 1.9s ease forwards}
 #anma .an-bar{position:relative;height:84px;display:flex;align-items:center;justify-content:center;gap:12px}
 #anma button{font:14px system-ui,sans-serif;color:#f4f1ea;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);border-radius:999px;
  padding:9px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:background .2s,opacity .3s,transform .2s}
@@ -41,7 +42,9 @@
   el.id = 'anma'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '10 Kasım anma');
   el.innerHTML = `<div class="an-bg"></div>
 <div class="an-vid"><video playsinline preload="auto" poster="anma/poster.jpg" src="anma/ataturk.mp4"></video></div>
-<div class="an-txt"><h1>Mustafa Kemal Atatürk</h1><p>Ölümünün ${yil}. yılında saygı ve özlemle anıyoruz</p><div class="an-line"></div></div>
+<div class="an-txt"><h1>Minnetle Anıyoruz</h1>
+<p>10 Kasım, yalnızca bir yas günü değil; Atatürk’ün fikirlerini, ilke ve inkılaplarını yaşatma sorumluluğumuzu hatırladığımız gündür. Saygı, özlem ve minnetle anıyoruz. Daima izindeyiz, Atam...</p>
+<div class="an-line"></div><div class="an-sig">1881 – Sonsuzluğa uzanan bir miras.</div></div>
 <div class="an-bar"><button class="an-snd" hidden>🔊 Sesi aç</button>
 <button class="an-skip" disabled><svg viewBox="0 0 24 24"><circle class="trk" cx="12" cy="12" r="11"/><circle class="prg" cx="12" cy="12" r="11"/></svg><span>Geç (${WAIT})</span></button></div>`;
   document.body.appendChild(el);
