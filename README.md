@@ -63,7 +63,10 @@ Sunucuyu bir bilgisayarda/VPS'te çalıştır ve **HTTPS** arkasına koy (Caddy,
 
 ## Otomatik güncelleme
 Kurulu masaüstü uygulaması açılışta ve her 6 saatte bir GitHub Releases'i denetler; yeni sürüm varsa indirir ve "Şimdi yeniden başlat" diye sorar. Elle denetlemek için sistem tepsisi menüsünde **Güncellemeleri denetle**.
-Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır → GitHub'da `v<sürüm>` etiketiyle Release oluştur (örn. `v2.3.2`); derleme otomatik yapılır.
+Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır → GitHub'da `v<sürüm>` etiketiyle Release oluştur (örn. `v2.4.0`); derleme otomatik yapılır.
 
 ## 10 Kasım anma ekranı
 Her yıl 10 Kasım'da uygulama açılırken Atatürk'ü anan kısa bir video gösterilir. İlk 5 saniye geçilemez, sonra **Geç** düğmesi açılır; video bitince de kendiliğinden kapanır. Denemek için adrese `?anma=1` ekle (örn. `http://localhost:3000/?anma=1`). Video: `public/anma/ataturk.mp4`.
+
+## Kediler 🐱
+Ayarlar → **Kediler** bölümünden açılıp kapatılır, 6 türden en fazla 3 kedi seçilir. Kediler sayfada serbestçe gezer, oturur, uyur, imleci takip eder, arada fare kovalar; üzerlerine gelince mırlar (sevilir), müzik çalarken oturanlar sallanır. Tıklamayı engellemezler, "hareketi azalt" ayarında koşmazlar. Çizimler `public/kedi/*.png` (9 karelik şeritler); yeni tür için `kedi.js` içindeki `TYPES` listesine ekle.

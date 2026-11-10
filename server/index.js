@@ -44,7 +44,8 @@ const theme = t => {
   if (t === null) return null; if (typeof t != 'object') throw new Error('Geçersiz tema');
   const o = {}; for (const k of ['a', 'c', 's', 'x']) if (HEX.test(t[k])) o[k] = t[k];
   o.r = num(t.r, 0, 28, 12); o.fs = num(t.fs, 13, 19, 15); o.dim = num(t.dim, 0, 80, 30); o.op = num(t.op, 30, 100, 80); o.bl = num(t.bl, 0, 20, 0);
-  o.m = ['image', 'video'].includes(t.m) ? t.m : ''; o.p = !!t.p; o.lg = typeof t.lg == 'string' && /^[a-z0-9-]{1,30}$/.test(t.lg) ? t.lg : 'varsayilan'; return o;
+  o.m = ['image', 'video'].includes(t.m) ? t.m : ''; o.p = !!t.p; o.lg = typeof t.lg == 'string' && /^[a-z0-9-]{1,30}$/.test(t.lg) ? t.lg : 'varsayilan';
+  o.kd = t.kd !== false; o.kl = Array.isArray(t.kl) ? [...new Set(t.kl.filter(x => typeof x == 'string' && /^[a-z]{2,12}$/.test(x)))].slice(0, 3) : ['zencefil']; return o;
 };
 const img = (u, k, d) => {
   const v = k == 'avatar' ? 'av' : 'bv';
