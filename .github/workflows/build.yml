@@ -16,6 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Etiket package.json sürümüyle aynı mı?
+        shell: bash
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [ "v$V" != "${{ github.ref_name }}" ]; then
+            echo "::error::Etiket ${{ github.ref_name }} ama package.json sürümü $V. Önce package.json'daki version değerini etikete eşitleyip merge et, sonra Release aç."
+            exit 1
+          fi
       - run: npm install
       - run: npx electron-builder --publish always
         env:
