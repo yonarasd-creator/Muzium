@@ -72,3 +72,6 @@ Her yıl 10 Kasım'da uygulama açılırken Atatürk'ü anan kısa bir video gö
 Ayarlar → **Kediler** bölümünden açılıp kapatılır; 9 türden (zencefil, kahve, gece, pamuk, alaca, smokin, tüylü, sütlü, tekir) en fazla 3 kedi seçilir.
 Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgileri zemin olarak tarar, üstünde yürür, bir kenardan diğerine zıplar, aşağı atlar, pencere kenarına tırmanır, kutunun ucunda **kuyruğu sarkıtarak uyur**, tımar eder, esner, gerinir, imlece bakar, arada fare kovalar; üzerine gelince sevilir, müzik çalarken oturanlar sallanır. Tıklamayı engellemezler, "hareketi azalt" ayarında zıplamaz/tırmanmazlar.
 Çizim PNG değil, her karede iskeletten (gövde, kafa, bacak, kuyruk) kodla yapılır: `public/kedi-art.js` (çizim), `public/kedi.js` (davranış). Yeni tür için `kedi-art.js` içindeki `T` tablosuna renk paleti ekle.
+
+## Hareketli profil fotoğrafı ve videolu kapak
+Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Profil → Kapak: görsel, GIF/WebP (en fazla 3 MB) veya kısa MP4/WebM video (en fazla 6 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
