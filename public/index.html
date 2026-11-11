@@ -233,7 +233,11 @@ const cT=()=>queue[idx];
 async function paintLike(){const t=cT(),l=t&&await get('lists','liked');$('#lk').textContent=l&&l.ids.includes(t.id)?'❤️':'🤍';mini()}
 $('#lk').onclick=async()=>{const t=cT();if(!t)return;const l=await get('lists','liked')||{id:'liked',name:'❤ Beğenilenler',ids:[]};
  if(l.ids.includes(t.id)){l.ids=l.ids.filter(x=>x!=t.id);await put('lists',l);toast('Beğenilenlerden çıkarıldı')}else{await addTo(l,[t]);toast('Beğenildi ❤')}paintLike()};
-async function addRecent(t){try{await put('tracks',t);const l=await get('lists','recent')||{id:'recent',name:'🕘 Son dinlenenler',ids:[]};l.ids=[t.id,...l.ids.filter(x=>x!=t.id)].slice(0,30);await put('lists',l)}catch{}}
+function bumpPlay(t){try{const m=JSON.parse(localStorage.getItem('pc')||'{}');m[t.id]=(m[t.id]||0)+1;localStorage.setItem('pc',JSON.stringify(m))}catch{}}
+window.kediPick=async()=>{try{const m=JSON.parse(localStorage.getItem('pc')||'{}'),cur=queue&&queue[idx]&&queue[idx].id,ids=Object.keys(m).filter(i=>m[i]>=2&&i!=cur).sort((a,b)=>m[b]-m[a]).slice(0,8);
+ for(let k=0;k<ids.length;k++){const id=ids[Math.random()*ids.length|0],t=await get('tracks',id);if(t)return{t,n:m[id]}}}catch{}return null};
+window.kediPlay=t=>play([t],0);
+async function addRecent(t){bumpPlay(t);try{await put('tracks',t);const l=await get('lists','recent')||{id:'recent',name:'🕘 Son dinlenenler',ids:[]};l.ids=[t.id,...l.ids.filter(x=>x!=t.id)].slice(0,30);await put('lists',l)}catch{}}
 function showQueue(){const d=$('#dlg');
  d.innerHTML=`<b>Sıra (${queue.length})</b><div style="max-height:60vh;overflow:auto;margin:8px 0">${queue.map((t,i)=>`<div class="row${i==idx?' cur':''}" data-i="${i}"><div class="i" data-q="go"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><button class="ic" data-q="rm">✕</button></div>`).join('')||'<p class="muted">Sıra boş</p>'}</div><button class="btn g" id="qc">Kapat</button>`;
  if(!d.open)d.showModal();$('#qc').onclick=()=>d.close();

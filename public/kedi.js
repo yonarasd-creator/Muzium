@@ -39,6 +39,10 @@
   const CSS = `#kedi{position:fixed;inset:0;z-index:900;pointer-events:none;overflow:hidden}
 #kedi canvas,#kedi img{position:absolute;left:0;top:0;image-rendering:pixelated;will-change:transform;user-select:none;-webkit-user-select:none}
 #kedi .kc{width:${SW}px;height:${SH}px;transform-origin:${SW / 2}px 0}
+#kedi .kb{position:absolute;left:0;top:0;pointer-events:auto;background:var(--card,#26262e);color:var(--tx,#fff);border:1px solid var(--a,#1fb89a);border-radius:12px;padding:8px 10px;font:13px/1.35 system-ui,sans-serif;max-width:230px;box-shadow:0 6px 22px rgba(0,0,0,.4);animation:kb-in .25s ease}
+#kedi .kb small{display:block;opacity:.7;margin-top:2px}#kedi .kb div{display:flex;gap:6px;margin-top:7px}
+#kedi .kb button{font:12px system-ui;border:0;border-radius:999px;padding:5px 11px;cursor:pointer;background:var(--a,#1fb89a);color:#06201a}#kedi .kb button+button{background:rgba(128,128,128,.25);color:inherit}
+@keyframes kb-in{from{opacity:0;transform:translateY(6px)}}
 #kedi .kp{pointer-events:none;animation:kp-up 1.3s ease-out forwards}
 #kedi .kz{animation-duration:2.4s;animation-name:kz-up}
 @keyframes kp-up{from{opacity:1;transform:translateY(0) scale(.7)}to{opacity:0;transform:translateY(-44px) scale(1.15)}}
@@ -215,6 +219,21 @@
     cats.forEach(c => { if (c.st == 'chase') caught ? pet(c, 2) : setSt(c, 'sit', rnd(1, 3)); });
   }
 
+  // ---- şarkı önerisi: en çok dinlenenlerden birini konuşma balonuyla önerir ----
+  let sug = null, sugT = rnd(90, 150);
+  const esc = x => String(x).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+  function closeSug() { if (sug) { sug.el.remove(); if (sug.c.st == 'sit') sug.c.t = 1; sug = null; } }
+  async function suggest() {
+    if (sug || !window.kediPick || calm() || music) return;
+    const cs = cats.filter(c => c.plat && c.st == 'sit'); if (!cs.length) return;
+    const r = await window.kediPick(); if (!r || sug) return;
+    const c = pick(cs); if (c.st != 'sit') return;
+    const el = document.createElement('div'); el.className = 'kb';
+    el.innerHTML = `🎵 Bunu dinleyelim mi?<small>${esc(r.t.title)} · ${esc(r.t.artist || '')}</small><div><button>▶ Çal</button><button>Şimdi değil</button></div>`;
+    const [b1, b2] = el.querySelectorAll('button'); b1.onclick = () => { try { window.kediPlay(r.t); } catch {} puff('heart', c.x - 10, c.y - 74); closeSug(); }; b2.onclick = closeSug;
+    layer.appendChild(el); setSt(c, 'sit', 14); sug = { el, c, life: 14 };
+  }
+
   // ---- poz (kedi-art parametreleri) ----
   const tph = (T, rate) => +((Math.floor(T * rate) % 16) * Math.PI / 8).toFixed(3);
   function pose(c, T) {
@@ -367,11 +386,16 @@
       }
     } else if (cats.length && !calm()) { mouseT -= dt; if (mouseT <= 0) { spawnMouse(); mouseT = rnd(60, 110); } }
     for (const c of cats) update(c, dt, now, T);
+    if (sug) {
+      sug.life -= dt; const c = sug.c;
+      if (sug.life <= 0 || !cats.includes(c) || busy(c) || c.st == 'walk') closeSug();
+      else { c.t = Math.max(c.t, 1); const w = sug.el.offsetWidth, h = sug.el.offsetHeight; sug.el.style.transform = `translate3d(${Math.round(clamp(c.x - w / 2, 6, innerWidth - w - 6))}px,${Math.round(Math.max(6, c.y - 82 - h))}px,0)`; sug.el.style.zIndex = 2000; }
+    } else if (cats.length) { sugT -= dt; if (sugT <= 0) { suggest(); sugT = rnd(240, 420); } }
   }
 
   function start() { ensureLayer(); if (!raf) { last = performance.now(); scan(); raf = requestAnimationFrame(loop); } }
   function stop() {
-    cancelAnimationFrame(raf); raf = 0; mouse = null; cats = []; plats = [];
+    cancelAnimationFrame(raf); raf = 0; mouse = null; cats = []; plats = []; sug = null;
     if (layer) { layer.remove(); layer = null; } if (styleEl) { styleEl.remove(); styleEl = null; }
   }
 
@@ -397,5 +421,5 @@
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (layer) { last = performance.now(); raf = requestAnimationFrame(loop); }
   });
 
-  window.Kedi = { sync, types: TYPES, max: MAX, mouse: spawnMouse, _dbg: () => ({ cats, plats, mouse, travel: planTravel, climb: c => { c.plan = null; } }) };
+  window.Kedi = { sync, types: TYPES, max: MAX, mouse: spawnMouse, _dbg: () => ({ suggest, cats, plats, mouse, travel: planTravel, climb: c => { c.plan = null; } }) };
 })();
