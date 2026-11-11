@@ -101,6 +101,34 @@ app.patch('/api/me', auth, (q, s) => {
     save(); notify(u.username); s.json({ user: me(u) });
   } catch (e) { s.status(400).json({ error: e.message }); }
 });
+// Hareketli profil fotoğrafı (GIF / hareketli WebP) ve videolu kapak (MP4 / WebM): ham dosya yüklenir, tür sihirli baytlardan doğrulanır
+const kind = b => {
+  if (b.length < 12) return null;
+  if (b.toString('latin1', 0, 4) == 'GIF8') return ['gif', 'image'];
+  if (b[0] == 0x89 && b.toString('latin1', 1, 4) == 'PNG') return ['png', 'image'];
+  if (b[0] == 0xff && b[1] == 0xd8 && b[2] == 0xff) return ['jpg', 'image'];
+  if (b.toString('latin1', 0, 4) == 'RIFF' && b.toString('latin1', 8, 12) == 'WEBP') return ['webp', 'image'];
+  if (b.toString('latin1', 4, 8) == 'ftyp') return ['mp4', 'video'];
+  if (b[0] == 0x1a && b[1] == 0x45 && b[2] == 0xdf && b[3] == 0xa3) return ['webm', 'video'];
+  return null;
+};
+const MAXB = { avatar: { image: 1.5e6, video: 0 }, banner: { image: 3e6, video: 6e6 } };
+app.put('/api/me/media/:kind', auth, (q, s, n) => {
+  if (!MAXB[q.params.kind]) return s.status(404).json({ error: 'Bulunamadı' });
+  if (limit('u' + q.ip, 12, 6e4)) return s.status(429).json({ error: 'Çok fazla yükleme, biraz bekle' });
+  n();
+}, express.raw({ type: () => true, limit: '6mb' }), (q, s) => {
+  try {
+    const k = q.params.kind, u = q.me, b = Buffer.isBuffer(q.body) ? q.body : Buffer.alloc(0), t = kind(b);
+    if (!t) throw new Error('Desteklenmeyen dosya (JPG, PNG, GIF, WebP' + (k == 'banner' ? ', MP4, WebM' : '') + ')');
+    const max = MAXB[k][t[1]]; if (!max) throw new Error('Profil fotoğrafı için video yerine GIF veya hareketli WebP kullan');
+    if (b.length > max) throw new Error(`Dosya çok büyük (en fazla ${(max / 1e6).toFixed(1).replace('.', ',')} MB)`);
+    const f = `${k}-${u.username}.${t[0]}`, v = k == 'avatar' ? 'av' : 'bv';
+    if (u[k] && u[k] != f) fs.rmSync(path.join(UP, u[k]), { force: true });
+    fs.writeFileSync(path.join(UP, f), b); u[k] = f; u[v] = Date.now();
+    save(); notify(u.username); s.json({ user: me(u) });
+  } catch (e) { s.status(400).json({ error: e.message }); }
+});
 app.get('/api/users', auth, (q, s) => {
   const t = S(q.query.q, 20).toLowerCase(); if (!t) return s.json({ users: [] });
   s.json({ users: Object.values(db.users).filter(u => u.username.startsWith(t) && u != q.me).slice(0, 8).map(pub) });

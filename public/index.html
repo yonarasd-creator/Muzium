@@ -84,7 +84,7 @@ html.bl nav,html.bl .card,html.bl #bar{backdrop-filter:blur(var(--bl,0px))}
 textarea{width:100%;padding:12px;border:0;background:var(--s);color:var(--t);margin-bottom:10px;font:inherit;resize:vertical}
 nav button{font-size:13px;padding:12px 2px;white-space:nowrap}
 .av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#2a2a2c;flex:none}.av.lg{width:84px;height:84px;border:4px solid var(--bgs)}
-.ban{height:110px;background:var(--a) center/cover}
+.ban{height:110px;background:var(--a) center/cover;position:relative;overflow:hidden}.ban video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}@media (prefers-reduced-motion:reduce){.ban video{display:none}}
 .dot{width:9px;height:9px;border-radius:50%;background:#666;display:inline-block}.dot.on{background:#3ba55d}
 .msgs{display:flex;flex-direction:column;gap:6px;min-height:40vh}.msg{max-width:82%;padding:8px 12px;border-radius:14px;background:var(--s);word-break:break-word;align-self:flex-start}.msg.me{align-self:flex-end;background:var(--a);color:#000}
 .bd{background:var(--a);color:#000;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:4px}
@@ -233,7 +233,11 @@ const cT=()=>queue[idx];
 async function paintLike(){const t=cT(),l=t&&await get('lists','liked');$('#lk').textContent=l&&l.ids.includes(t.id)?'❤️':'🤍';mini()}
 $('#lk').onclick=async()=>{const t=cT();if(!t)return;const l=await get('lists','liked')||{id:'liked',name:'❤ Beğenilenler',ids:[]};
  if(l.ids.includes(t.id)){l.ids=l.ids.filter(x=>x!=t.id);await put('lists',l);toast('Beğenilenlerden çıkarıldı')}else{await addTo(l,[t]);toast('Beğenildi ❤')}paintLike()};
-async function addRecent(t){try{await put('tracks',t);const l=await get('lists','recent')||{id:'recent',name:'🕘 Son dinlenenler',ids:[]};l.ids=[t.id,...l.ids.filter(x=>x!=t.id)].slice(0,30);await put('lists',l)}catch{}}
+function bumpPlay(t){try{const m=JSON.parse(localStorage.getItem('pc')||'{}');m[t.id]=(m[t.id]||0)+1;localStorage.setItem('pc',JSON.stringify(m))}catch{}}
+window.kediPick=async()=>{try{const m=JSON.parse(localStorage.getItem('pc')||'{}'),cur=queue&&queue[idx]&&queue[idx].id,ids=Object.keys(m).filter(i=>m[i]>=2&&i!=cur).sort((a,b)=>m[b]-m[a]).slice(0,8);
+ for(let k=0;k<ids.length;k++){const id=ids[Math.random()*ids.length|0],t=await get('tracks',id);if(t)return{t,n:m[id]}}}catch{}return null};
+window.kediPlay=t=>play([t],0);
+async function addRecent(t){bumpPlay(t);try{await put('tracks',t);const l=await get('lists','recent')||{id:'recent',name:'🕘 Son dinlenenler',ids:[]};l.ids=[t.id,...l.ids.filter(x=>x!=t.id)].slice(0,30);await put('lists',l)}catch{}}
 function showQueue(){const d=$('#dlg');
  d.innerHTML=`<b>Sıra (${queue.length})</b><div style="max-height:60vh;overflow:auto;margin:8px 0">${queue.map((t,i)=>`<div class="row${i==idx?' cur':''}" data-i="${i}"><div class="i" data-q="go"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><button class="ic" data-q="rm">✕</button></div>`).join('')||'<p class="muted">Sıra boş</p>'}</div><button class="btn g" id="qc">Kapat</button>`;
  if(!d.open)d.showModal();$('#qc').onclick=()=>d.close();
@@ -442,6 +446,7 @@ let ME=null,ws=null,offline=false,chatWith=null,FR={friends:[],incoming:[],outgo
 const api=async(m,u,b)=>{const r=await fetch('/api'+u,{method:m,headers:b?{'Content-Type':'application/json'}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Hata');return j};
 const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}},lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const AV=u=>u.avatar||PH;
+const isVid=u=>/\.(mp4|webm)(\?|$)/i.test(u||''),banStyle=u=>u.banner&&!isVid(u.banner)?`background-image:url('${esc(u.banner)}')`:`background:${esc(u.color)}`,banIn=u=>u.banner&&isVid(u.banner)?`<video src="${esc(u.banner)}" autoplay muted loop playsinline></video>`:'';
 async function boot(){
  loadTheme();
  try{ME=(await api('GET','/me')).user;lsSet('me',ME);if(ME.theme&&!lsGet('theme')){Object.assign(TH,ME.theme);lsSet('theme',TH);applyVars(TH);setBg(TH)}}
@@ -508,26 +513,34 @@ async function shareTrack(t){
  d.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{d.close();try{await api('POST','/messages/'+b.dataset.u,{text:'',att:{type:'track',track:{id:t.id,title:t.title,artist:t.artist,art:t.art||'',url:t.url||'',aid:t.aid||'',src:t.src||''}}});toast('Gönderildi ✓')}catch(e){toast(e.message)}})}
 async function showProfile(un){
  try{const u=un==ME.username?ME:(await api('GET','/users/'+un)).user,d=$('#dlg');
-  d.innerHTML=`<div class="ban" style="${u.banner?`background-image:url('${esc(u.banner)}')`:`background:${esc(u.color)}`}"></div><img class="av lg" src="${esc(AV(u))}" style="margin:-42px 0 0 14px"><h3 style="margin:6px 0 0">${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'çevrimiçi':'çevrimdışı'}</small>${u.status?`<p>${esc(u.status)}</p>`:''}<p>${esc(u.bio)}</p><small class="muted">Katılım: ${new Date(u.created).toLocaleDateString('tr')}</small><br><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
+  d.innerHTML=`<div class="ban" style="${banStyle(u)}">${banIn(u)}</div><img class="av lg" src="${esc(AV(u))}" style="margin:-42px 0 0 14px"><h3 style="margin:6px 0 0">${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'çevrimiçi':'çevrimdışı'}</small>${u.status?`<p>${esc(u.status)}</p>`:''}<p>${esc(u.bio)}</p><small class="muted">Katılım: ${new Date(u.created).toLocaleDateString('tr')}</small><br><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
   d.showModal();$('#x').onclick=()=>d.close()}catch(e){toast(e.message)}}
 async function shrink(f,w,h){const b=await createImageBitmap(f),c=document.createElement('canvas');c.width=w;c.height=h;const k=Math.max(w/b.width,h/b.height),sw=w/k,sh=h/k;c.getContext('2d').drawImage(b,(b.width-sw)/2,(b.height-sh)/2,sw,sh,0,0,w,h);return c.toDataURL('image/jpeg',.82)}
 function vMe(){
  if(!ME){M.innerHTML='<p class="muted">Hesapsız / çevrimdışı moddasın.</p><button class="btn" id="li">Giriş yap veya hesap oluştur</button>';return $('#li').onclick=()=>{offline=false;showAuth()}}
  const pend={};
- M.innerHTML=`<div id="pc2"><div class="ban" id="pb" style="${ME.banner?`background-image:url('${esc(ME.banner)}')`:`background:${esc(ME.color)}`}"></div><img class="av lg" id="pa" src="${esc(AV(ME))}" style="margin:-42px 0 10px 14px">
- <div><button class="btn g" id="ua">Fotoğraf</button> <button class="btn g" id="ub">Kapak</button> <button class="btn g" id="ra">Fotoğrafı kaldır</button></div>
- <input type="file" id="fa" accept="image/*" hidden><input type="file" id="fb" accept="image/*" hidden>
+ M.innerHTML=`<div id="pc2"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div><img class="av lg" id="pa" src="${esc(AV(ME))}" style="margin:-42px 0 10px 14px">
+ <div><button class="btn g" id="ua">Fotoğraf</button> <button class="btn g" id="ub">Kapak</button> <button class="btn g" id="ra">Fotoğrafı kaldır</button> <button class="btn g" id="rb">Kapağı kaldır</button></div>
+ <small class="muted" style="display:block;margin:4px 0 8px">Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Kapak: görsel, GIF veya kısa video (MP4/WebM, en fazla 6 MB; sessiz ve döngüde oynar).</small>
+ <input type="file" id="fa" accept="image/*" hidden><input type="file" id="fb" accept="image/*,video/mp4,video/webm" hidden>
  <label class="f">Görünen ad<input type="text" id="pd" maxlength="30" value="${esc(ME.display)}" style="width:60%;margin:0"></label>
  <label class="f">Durum<input type="text" id="ps" maxlength="60" value="${esc(ME.status)}" style="width:60%;margin:0"></label>
  <label class="f">Profil rengi<input type="color" id="pcl" value="${esc(ME.color)}"></label>
  <textarea id="pbio" rows="3" maxlength="300" placeholder="Biyografi">${esc(ME.bio)}</textarea>
  <button class="btn" id="sv">Kaydet</button> <button class="btn g" id="vw2">Önizle</button> <button class="btn g" id="lo">Çıkış yap</button></div>`;
  $('#ua').onclick=()=>$('#fa').click();$('#ub').onclick=()=>$('#fb').click();
- $('#fa').onchange=async e=>{if(e.target.files[0]){pend.avatar=await shrink(e.target.files[0],256,256);$('#pa').src=pend.avatar}};
- $('#fb').onchange=async e=>{if(e.target.files[0]){pend.banner=await shrink(e.target.files[0],960,320);$('#pb').style.backgroundImage=`url(${pend.banner})`}};
+ const raw={},anim=async f=>f.type=='image/gif'||(f.type=='image/webp'&&new TextDecoder('latin1').decode(await f.slice(0,160).arrayBuffer()).includes('ANIM')),vid=f=>/^video\/(mp4|webm)$/.test(f.type);
+ $('#fa').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(await anim(f)){if(f.size>1.5e6)return toast('Hareketli fotoğraf en fazla 1,5 MB olabilir');raw.avatar=f;delete pend.avatar;$('#pa').src=URL.createObjectURL(f)}
+  else{pend.avatar=await shrink(f,256,256);delete raw.avatar;$('#pa').src=pend.avatar}};
+ $('#fb').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const pb=$('#pb');
+  if(vid(f)||await anim(f)){if(f.size>(vid(f)?6e6:3e6))return toast(vid(f)?'Video en fazla 6 MB olabilir':'Hareketli kapak en fazla 3 MB olabilir');raw.banner=f;delete pend.banner;
+   if(vid(f)){pb.style.background=ME.color;pb.innerHTML=`<video src="${URL.createObjectURL(f)}" autoplay muted loop playsinline></video>`}else{pb.innerHTML='';pb.style.background=`url(${URL.createObjectURL(f)}) center/cover`}}
+  else{pend.banner=await shrink(f,960,320);delete raw.banner;pb.innerHTML='';pb.style.background=`url(${pend.banner}) center/cover`}};
+ $('#rb').onclick=()=>{pend.banner='';delete raw.banner;$('#pb').innerHTML='';$('#pb').style.background=ME.color};
  $('#ra').onclick=()=>{pend.avatar='';$('#pa').src=PH};
  $('#vw2').onclick=()=>showProfile(ME.username);
- $('#sv').onclick=async()=>{try{ME=(await api('PATCH','/me',{display:$('#pd').value,status:$('#ps').value,color:$('#pcl').value,bio:$('#pbio').value,...pend})).user;lsSet('me',ME);toast('Profil kaydedildi ✓');vMe()}catch(e){toast(e.message)}};
+ $('#sv').onclick=async()=>{try{for(const k in raw){const r=await fetch('/api/me/media/'+k,{method:'PUT',headers:{'Content-Type':'application/octet-stream'},body:raw[k]}),j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Yükleme başarısız')}ME=(await api('PATCH','/me',{display:$('#pd').value,status:$('#ps').value,color:$('#pcl').value,bio:$('#pbio').value,...pend})).user;lsSet('me',ME);toast('Profil kaydedildi ✓');vMe()}catch(e){toast(e.message)}};
  $('#lo').onclick=async()=>{try{await api('POST','/logout')}catch{}ws&&ws.close();ws=null;ME=null;lsSet('me',null);lsSet('theme',null);FR={friends:[],incoming:[],outgoing:[]};UNR={};badge();showAuth()}}
 
 // ================= Tema sistemi =================
