@@ -69,4 +69,6 @@ Yeni sürüm yayınlamak için: `package.json`'daki `version` değerini artır �
 Her yıl 10 Kasım'da uygulama açılırken Atatürk'ü anan kısa bir video gösterilir. İlk 5 saniye geçilemez, sonra **Geç** düğmesi açılır; video bitince de kendiliğinden kapanır. Denemek için adrese `?anma=1` ekle (örn. `http://localhost:3000/?anma=1`). Video: `public/anma/ataturk.mp4`.
 
 ## Kediler 🐱
-Ayarlar → **Kediler** bölümünden açılıp kapatılır, 6 türden en fazla 3 kedi seçilir. Kediler sayfada serbestçe gezer, oturur, uyur, imleci takip eder, arada fare kovalar; üzerlerine gelince mırlar (sevilir), müzik çalarken oturanlar sallanır. Tıklamayı engellemezler, "hareketi azalt" ayarında koşmazlar. Çizimler `public/kedi/*.png` (9 karelik şeritler); yeni tür için `kedi.js` içindeki `TYPES` listesine ekle.
+Ayarlar → **Kediler** bölümünden açılıp kapatılır; 9 türden (zencefil, kahve, gece, pamuk, alaca, smokin, tüylü, sütlü, tekir) en fazla 3 kedi seçilir.
+Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgileri zemin olarak tarar, üstünde yürür, bir kenardan diğerine zıplar, aşağı atlar, pencere kenarına tırmanır, kutunun ucunda **kuyruğu sarkıtarak uyur**, tımar eder, esner, gerinir, imlece bakar, arada fare kovalar; üzerine gelince sevilir, müzik çalarken oturanlar sallanır. Tıklamayı engellemezler, "hareketi azalt" ayarında zıplamaz/tırmanmazlar.
+Çizim PNG değil, her karede iskeletten (gövde, kafa, bacak, kuyruk) kodla yapılır: `public/kedi-art.js` (çizim), `public/kedi.js` (davranış). Yeni tür için `kedi-art.js` içindeki `T` tablosuna renk paleti ekle.
