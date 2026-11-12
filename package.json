@@ -1,6 +1,6 @@
 {
   "name": "muzigim",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Kişiselleştirilebilir müzik çalar: hesaplar, profiller, arkadaşlar, mesajlaşma, şarkı paylaşımı, özel temalar",
   "main": "electron/main.js",
   "scripts": {
