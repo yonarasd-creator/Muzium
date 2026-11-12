@@ -340,7 +340,7 @@ async function vAra(){
  M.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{src=b.dataset.s;try{localStorage.setItem('src',src)}catch{};load()});
  M.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{genre=genre==b.dataset.g?'':b.dataset.g;lastQ='';load()});
  if($('#mo'))$('#mo').onclick=()=>{page++;load(false)};
- $('#gs').onclick=()=>{const d=$('#dlg');d.innerHTML=`<b>Jamendo anahtarı</b><p class="muted" style="font-size:13px">devportal.jamendo.com adresinde ücretsiz hesap aç, "Create an application" de ve çıkan <b>Client ID</b>'yi buraya yapıştır.</p><input type="text" id="jk" value="${esc(jkey())}" placeholder="Client ID"><b>YouTube API anahtarı</b><p class="muted" style="font-size:13px">console.cloud.google.com → YouTube Data API v3 etkinleştir → API anahtarı oluştur.</p><input type="text" id="yk" value="${esc(ykey())}" placeholder="AIza…"><p class="muted" style="font-size:13px">İpucu: Aktar sekmesinden YouTube hesabını bağlarsan API anahtarı gerekmez.</p><button class="btn" id="sv">Kaydet</button> <button class="btn g" id="cl2">Kapat</button>`;d.showModal();
+ $('#gs').onclick=()=>{const d=$('#dlg');d.innerHTML=`<b>Jamendo anahtarı</b><p class="muted" style="font-size:13px">devportal.jamendo.com adresinde ücretsiz hesap aç, "Create an application" de ve çıkan <b>Client ID</b>'yi buraya yapıştır.</p><input type="text" id="jk" value="${esc(jkey())}" placeholder="Client ID"><b>YouTube API anahtarı</b><p class="muted" style="font-size:13px">console.cloud.google.com → YouTube Data API v3 etkinleştir → API anahtarı oluştur.</p><input type="text" id="yk" value="${esc(ykey())}" placeholder="AIza…"><p class="muted" style="font-size:13px">İpucu: Ayarlar (⚙) → YouTube hesabı'ndan Google ile giriş yaparsan API anahtarı gerekmez.</p><button class="btn" id="sv">Kaydet</button> <button class="btn g" id="cl2">Kapat</button>`;d.showModal();
   $('#cl2').onclick=()=>d.close();$('#sv').onclick=()=>{try{localStorage.setItem('jk',$('#jk').value.trim());localStorage.setItem('yk',$('#yk').value.trim())}catch{};d.close();toast('Kaydedildi');load()}};
  $('#r').onclick=async e=>{const row=e.target.closest('.row');if(!row)return;const t=res[row.dataset.i],a=e.target.closest('[data-a]')?.dataset.a;
   if(a=='play')play(res,+row.dataset.i);
@@ -602,6 +602,7 @@ function vTheme(){
  const c=(k,l)=>`<label class="f">${l}<input type="color" data-k="${k}" value="${TH[k]}"></label>`,r=(k,l,a,b)=>`<label class="f">${l}<input type="range" data-k="${k}" min="${a}" max="${b}" value="${TH[k]}"></label>`;
  M.innerHTML=`<div id="tc"><h4 style="margin-top:0">Hazır temalar</h4><div class="chips">${PRE.map((p,i)=>`<button class="chip" data-p="${i}" style="border-left:14px solid ${p.t.a}">${p.n}</button>`).join('')}</div>
  <h4>Logo</h4><div class="chips">${LOGOS.map(l=>`<button class="chip" data-lg="${l.id}" aria-label="Logo" style="padding:4px;display:inline-flex${TH.lg==l.id?';outline:2px solid var(--a)':''}"><img src="${l.f}" alt="" style="width:64px;height:64px;border-radius:10px;display:block"></button>`).join('')}</div>
+ <h4>YouTube hesabı ▶</h4><div id="ytb" style="margin-bottom:6px"></div>
  <h4>Kediler 🐱</h4><label class="f">Kedileri göster<input type="checkbox" data-k="kd" ${TH.kd!==false?'checked':''}></label>
  <div class="chips">${(()=>{const KL=TH.kl&&TH.kl.length?TH.kl:['zencefil'];return Kedi.types.map(([id,n])=>`<button class="chip" data-cat="${id}" aria-pressed="${KL.includes(id)}" title="${n}" style="padding:6px 8px;display:inline-flex;flex-direction:column;align-items:center;gap:2px${KL.includes(id)?';outline:2px solid var(--a)':''}"><img src="${KediArt.thumb(id)}" alt="" width="96" height="84" style="display:block;image-rendering:pixelated"><small>${n}</small></button>`).join('')})()}</div>
  <p class="muted" style="font-size:13px">En fazla 3 kedi seçebilirsin. Üzerine gelince sevebilirsin 💗 Kediler tıklamanı engellemez. <button class="btn g" id="kfare" style="margin-left:4px">🐭 Fare çıkar</button></p>
@@ -616,6 +617,7 @@ function vTheme(){
  tc.oninput=e=>{const k=e.target.dataset.k;if(!k)return;TH[k]=e.target.type=='checkbox'?e.target.checked:e.target.type=='range'?+e.target.value:e.target.value;
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{applyVars(TH);const v=$('#bg video');v&&vidPlay(v)})};
  tc.onchange=e=>{if(e.target.dataset.k)saveTheme()};
+ ytCard();
  tc.onclick=e=>{if(e.target.closest('#kfare')){Kedi.mouse();return}const ct=e.target.closest('[data-cat]');if(ct){const id=ct.dataset.cat;let l=TH.kl&&TH.kl.length?[...TH.kl]:['zencefil'];if(l.includes(id)){if(l.length>1)l=l.filter(x=>x!=id)}else{if(l.length>=Kedi.max)l.shift();l.push(id)}TH.kl=l;if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();return}const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
  $('#bu').onclick=()=>$('#bf').click();
  $('#bf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
@@ -640,34 +642,37 @@ function parseAny(txt,name){
   if(ti>=0)return rows.slice(1).map(r=>({title:r[ti],artist:(r[ai]||'').split(/[;,]/)[0]})).filter(x=>x.title)}
  return txt.split('\n').map(x=>x.trim()).filter(Boolean).map(split);
  function split(s){const p=s.split(/\s[-–]\s/);return p.length>1?{artist:p[0],title:p.slice(1).join(' - ')}:{title:s,artist:''}}}
+let ytCache=null;
 async function ytCard(){
  const box=$('#ytb');if(!box)return;const t=YT.get(),c=YT.cfg();
- if(!t){box.innerHTML=`<p class="muted" style="font-size:13px;margin:0 0 8px">Hesabını bağla: beğendiğin videoları ve playlistlerini listelerine aktarır, aramalar için API anahtarı gerekmez. Bir kez kurulum ister:</p>
-  <ol class="muted" style="font-size:13px;margin:0 0 10px;padding-left:18px"><li>console.cloud.google.com → proje oluştur → <b>YouTube Data API v3</b>'ü etkinleştir.</li><li>OAuth izin ekranı: <i>Harici</i>, "Test kullanıcıları"na kendi Google e-postanı ekle.</li><li>Kimlik bilgileri → <b>OAuth istemci kimliği</b> → tür <i>Web uygulaması</i>. "Yetkili yönlendirme URI'si" olarak şunu ekle:<br><code id="yru" style="user-select:all;word-break:break-all">${esc(YT.ru())}</code></li><li>Çıkan Client ID ve Client Secret'ı aşağı yapıştır.</li></ol>
-  <input type="text" id="ycid" placeholder="Client ID (…apps.googleusercontent.com)" value="${esc(c.cid||'')}"><input type="text" id="ysec" placeholder="Client Secret" value="${esc(c.sec||'')}"><button class="btn" id="yc">YouTube hesabını bağla</button> <span id="yst" class="muted"></span>`;
-  $('#yc').onclick=async()=>{const cid=$('#ycid').value.trim(),sec=$('#ysec').value.trim();try{localStorage.setItem('ytc',JSON.stringify({cid,sec}))}catch{}
+ if(!t){
+  let ready=false;try{ready=(await api('GET','/yt/config')).ready}catch{}
+  if(!$('#ytb'))return;
+  if(ready){box.innerHTML=`<p class="muted" style="font-size:13px;margin:0 0 8px">Google hesabınla giriş yap: beğendiğin müzikleri ve playlistlerini listelerine aktarır, YouTube aramaları kendi hesabınla yapılır, kediler beğendiklerinden şarkı önerir.</p><button class="btn" id="yc">Google ile giriş yap</button> <span id="yst" class="muted"></span><p class="muted" style="font-size:12px;margin:8px 0 0">Google "doğrulanmamış uygulama" uyarısı gösterirse <b>Gelişmiş → Devam et</b> de.</p>`}
+  else{box.innerHTML=`<p class="muted" style="font-size:13px;margin:0 0 8px">Bu sunucuda Google girişi kurulu değil (sunucu sahibi <code>server/google.json</code> dosyasına Client ID ve Secret ekleyince herkes tek tuşla bağlanır). Kendi kimliğinle denemek için:</p>
+   <details><summary class="muted" style="cursor:pointer">Gelişmiş kurulum</summary><ol class="muted" style="font-size:13px;margin:8px 0;padding-left:18px"><li>console.cloud.google.com → proje → <b>YouTube Data API v3</b>'ü etkinleştir.</li><li>OAuth izin ekranı: <i>Harici</i>, kendi e-postanı test kullanıcısı yap.</li><li>OAuth istemci kimliği (Web uygulaması), yönlendirme URI'si: <code style="user-select:all;word-break:break-all">${esc(YT.ru())}</code></li></ol>
+   <input type="text" id="ycid" placeholder="Client ID" value="${esc(c.cid||'')}"><input type="text" id="ysec" placeholder="Client Secret" value="${esc(c.sec||'')}"><button class="btn" id="yc">Bağla</button> <span id="yst" class="muted"></span></details>`}
+  $('#yc').onclick=async()=>{const cid=ready?'':$('#ycid').value.trim(),sec=ready?'':$('#ysec').value.trim();if(!ready)try{localStorage.setItem('ytc',JSON.stringify({cid,sec}))}catch{}
    try{const j=await api('POST','/yt/start',{cid,sec,ru:YT.ru()});window.open(j.url,'_blank');$('#yst').textContent='Tarayıcıda izin ver, sonra buraya dön…';
-    for(let i=0;i<300&&$('#yc');i++){await new Promise(r=>setTimeout(r,2000));const p=await api('POST','/yt/poll',{state:j.state});if(!p.wait){YT.set({at:p.access_token,rt:p.refresh_token,exp:Date.now()+p.expires_in*1e3});toast('YouTube bağlandı ✓');return ytCard()}}
+    for(let i=0;i<300&&$('#yc');i++){await new Promise(r=>setTimeout(r,2000));const p=await api('POST','/yt/poll',{state:j.state});if(!p.wait){YT.set({at:p.access_token,rt:p.refresh_token,exp:Date.now()+p.expires_in*1e3});ytCache=null;toast('YouTube bağlandı ✓');return ytCard()}}
    }catch(e){toast(e.message);const st=$('#yst');if(st)st.textContent=''}};return}
- box.innerHTML='<p class="muted">Yükleniyor…</p>';
- try{const ch=await YT.api('channels?part=snippet&mine=true'),n=ch.items&&ch.items[0]?ch.items[0].snippet.title:'Hesap',pl=(await YT.api('playlists?part=snippet,contentDetails&mine=true&maxResults=50')).items||[];
+ try{if(!ytCache||Date.now()-ytCache.t>12e4){box.innerHTML='<p class="muted">Yükleniyor…</p>';const ch=await YT.api('channels?part=snippet&mine=true');ytCache={t:Date.now(),n:ch.items&&ch.items[0]?ch.items[0].snippet.title:'Hesap',pl:(await YT.api('playlists?part=snippet,contentDetails&mine=true&maxResults=50')).items||[]}}
+  if(!$('#ytb'))return;const n=ytCache.n,pl=ytCache.pl;
   box.innerHTML=`<p style="margin:0 0 10px">✅ <b>${esc(n)}</b> bağlı</p><button class="btn" id="yl">❤ Beğendiğim müzikleri aktar</button> <button class="btn g" id="yd">Bağlantıyı kes</button><div id="ylog" class="muted" style="margin:8px 0"></div>
   ${pl.map(p=>`<div class="row" data-pl="${esc(p.id)}" data-n="${esc(p.snippet.title)}"><div class="i"><b>${esc(p.snippet.title)}</b><small>${p.contentDetails.itemCount} video</small></div><button class="btn g sm">Aktar</button></div>`).join('')||'<p class="muted">Playlist bulunamadı.</p>'}`;
   const log=m=>{const e=$('#ylog');if(e)e.textContent=m},done=async(l,tr)=>{l.ids=[];await addTo(l,tr);log(`“${l.name}” güncellendi: ${tr.length} şarkı`);toast('Aktarıldı ✓')};
-  $('#yd').onclick=()=>{YT.set(null);ytCard()};
+  $('#yd').onclick=()=>{YT.set(null);ytCache=null;ytCard()};
   $('#yl').onclick=async()=>{try{let tr=[],pt='';for(let i=0;i<6;i++){log(`Beğenilenler okunuyor… ${tr.length}`);const r=await YT.api('videos?part=snippet&myRating=like&maxResults=50'+(pt?'&pageToken='+pt:''));tr.push(...r.items.filter(v=>v.snippet.categoryId=='10').map(v=>ytTrack(v.id,v.snippet)));pt=r.nextPageToken;if(!pt)break}
    if(!tr.length)return log('Müzik kategorisinde beğenilen video bulunamadı');await done(await get('lists','yt-liked')||{id:'yt-liked',name:'▶ YouTube Beğenilenler',ids:[]},tr)}catch(e){log(e.message)}};
   box.querySelectorAll('[data-pl]').forEach(r=>r.querySelector('button').onclick=async()=>{try{let tr=[],pt='';for(let i=0;i<6;i++){log(`“${r.dataset.n}” okunuyor… ${tr.length}`);const x=await YT.api(`playlistItems?part=snippet&maxResults=50&playlistId=${encodeURIComponent(r.dataset.pl)}`+(pt?'&pageToken='+pt:''));tr.push(...x.items.filter(v=>v.snippet.resourceId&&v.snippet.title!='Private video'&&v.snippet.title!='Deleted video').map(v=>ytTrack(v.snippet.resourceId.videoId,v.snippet)));pt=x.nextPageToken;if(!pt)break}
    await done(await get('lists','yt-'+r.dataset.pl)||{id:'yt-'+r.dataset.pl,name:'▶ '+r.dataset.n,ids:[]},tr)}catch(e){log(e.message)}})
- }catch(e){box.innerHTML=`<p class="muted">${esc(e.message)}</p><button class="btn g" id="yd">Bağlantıyı kes</button>`;$('#yd').onclick=()=>{YT.set(null);ytCard()}}}
+ }catch(e){if(!$('#ytb'))return;box.innerHTML=`<p class="muted">${esc(e.message)}</p><button class="btn g" id="yd">Bağlantıyı kes</button>`;$('#yd').onclick=()=>{YT.set(null);ytCache=null;ytCard()}}}
 function vImp(){
- M.innerHTML=`<div class="card"><b>▶ YouTube hesabı</b><div id="ytb" style="margin-top:8px"></div></div>
- <div class="card"><b>Dış listeleri içe aktar</b><p class="muted">Spotify / YT Music / Apple Music listeni önce dışa aktar:<br>
+ M.innerHTML=`<div class="card"><b>Dış listeleri içe aktar</b><p class="muted">Spotify / YT Music / Apple Music listeni önce dışa aktar:<br>
  • Spotify → <u>exportify.net</u> ile CSV indir<br>• YT Music / Apple Music → <u>tunemymusic.com</u> veya <u>soundiiz.com</u> ile CSV indir<br>
  • Ya da bir .txt dosyasına her satıra <i>Sanatçı - Şarkı</i> yaz.</p>
  <button class="btn" id="pf">Dosya seç (.csv .json .txt)</button><input type="file" id="fi" accept=".csv,.json,.txt" hidden></div>
  <div class="card muted" style="font-size:13px">Şarkılar Audius kataloğunda aranıp eşleştirilir. Bulunamayanlar listelenir; Audius'ta olmayan ticari şarkılar (Spotify/Apple DRM'li) çalınamaz.</div><div id="log"></div>`;
- ytCard();
  $('#pf').onclick=()=>$('#fi').click();
  $('#fi').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   const items=parseAny(await f.text(),f.name);if(!items.length)return toast('Dosyada şarkı bulunamadı');
