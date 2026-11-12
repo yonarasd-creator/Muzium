@@ -532,7 +532,7 @@ function vMe(){
  const pend={};
  M.innerHTML=`<div id="pc2"><div class="pcd" style="margin-bottom:12px"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div><img class="av lg" id="pa" src="${esc(AV(ME))}" alt=""><div class="pnm"><h3>${esc(ME.display)}</h3><small class="muted">@${esc(ME.username)}</small></div></div>
  <div><button class="btn g" id="ua">Fotoğraf</button> <button class="btn g" id="ub">Kapak</button> <button class="btn g" id="ra">Fotoğrafı kaldır</button> <button class="btn g" id="rb">Kapağı kaldır</button></div>
- <small class="muted" style="display:block;margin:4px 0 8px">Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Kapak: görsel, GIF veya kısa video (MP4/WebM, en fazla 6 MB; sessiz ve döngüde oynar).</small>
+ <small class="muted" style="display:block;margin:4px 0 8px">Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 120 MB). Kapak: görsel, GIF veya video (MP4/WebM, en fazla 40 MB; video sessiz ve döngüde oynar).</small>
  <input type="file" id="fa" accept="image/*" hidden><input type="file" id="fb" accept="image/*,video/mp4,video/webm" hidden>
  <label class="f">Görünen ad<input type="text" id="pd" maxlength="30" value="${esc(ME.display)}" style="width:60%;margin:0"></label>
  <label class="f">Durum<input type="text" id="ps" maxlength="60" value="${esc(ME.status)}" style="width:60%;margin:0"></label>
@@ -542,10 +542,10 @@ function vMe(){
  $('#ua').onclick=()=>$('#fa').click();$('#ub').onclick=()=>$('#fb').click();
  const raw={},anim=async f=>f.type=='image/gif'||(f.type=='image/webp'&&new TextDecoder('latin1').decode(await f.slice(0,160).arrayBuffer()).includes('ANIM')),vid=f=>/^video\/(mp4|webm)$/.test(f.type);
  $('#fa').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-  if(await anim(f)){if(f.size>1.5e6)return toast('Hareketli fotoğraf en fazla 1,5 MB olabilir');raw.avatar=f;delete pend.avatar;$('#pa').src=URL.createObjectURL(f)}
+  if(await anim(f)){if(f.size>120e6)return toast('Hareketli fotoğraf en fazla 120 MB olabilir');raw.avatar=f;delete pend.avatar;$('#pa').src=URL.createObjectURL(f)}
   else{pend.avatar=await shrink(f,256,256);delete raw.avatar;$('#pa').src=pend.avatar}};
  $('#fb').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const pb=$('#pb');
-  if(vid(f)||await anim(f)){if(f.size>(vid(f)?6e6:3e6))return toast(vid(f)?'Video en fazla 6 MB olabilir':'Hareketli kapak en fazla 3 MB olabilir');raw.banner=f;delete pend.banner;
+  if(vid(f)||await anim(f)){if(f.size>40e6)return toast('Kapak en fazla 40 MB olabilir');raw.banner=f;delete pend.banner;
    if(vid(f)){pb.style.background=ME.color;pb.innerHTML=`<video src="${URL.createObjectURL(f)}" autoplay muted loop playsinline></video>`}else{pb.innerHTML='';pb.style.background=`url(${URL.createObjectURL(f)}) center/cover`}}
   else{pend.banner=await shrink(f,960,320);delete raw.banner;pb.innerHTML='';pb.style.background=`url(${pend.banner}) center/cover`}};
  $('#rb').onclick=()=>{pend.banner='';delete raw.banner;$('#pb').innerHTML='';$('#pb').style.background=ME.color};

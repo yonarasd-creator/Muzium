@@ -74,7 +74,7 @@ Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgil
 Çizim PNG değil, her karede iskeletten (gövde, kafa, bacak, kuyruk) kodla yapılır: `public/kedi-art.js` (çizim), `public/kedi.js` (davranış). Yeni tür için `kedi-art.js` içindeki `T` tablosuna renk paleti ekle.
 
 ## Hareketli profil fotoğrafı ve videolu kapak
-Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Profil → Kapak: görsel, GIF/WebP (en fazla 3 MB) veya kısa MP4/WebM video (en fazla 6 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
+Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 120 MB). Profil → Kapak: görsel, GIF/WebP veya MP4/WebM video (en fazla 40 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
 
 ## YouTube hesabını bağlama (Google ile giriş)
 Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı sadece Google'da giriş yapar; beğendiği müzikler ve playlistler listelerine aktarılır, YouTube aramaları kendi hesabıyla yapılır (API anahtarı gerekmez), kediler beğenilenlerden şarkı önerir. Jetonlar yalnızca kullanıcının cihazında tutulur.
@@ -83,4 +83,5 @@ Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı s
 1. console.cloud.google.com → proje oluştur → **YouTube Data API v3**'ü etkinleştir.
 2. OAuth izin ekranı: *Harici*; "Test kullanıcıları"na hesapları ekle (doğrulama olmadan en fazla 100 kişi).
 3. Kimlik bilgileri → OAuth istemci kimliği → *Web uygulaması*; yetkili yönlendirme URI'si: `http://localhost:38123/api/yt/callback` (masaüstü) ve varsa kendi sunucu adresin için `https://alanadin/api/yt/callback`.
-4. Çıkan Client ID ve Secret'ı `server/google.json` dosyasına yaz (ya da `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` ortam değişkeni). Bu bilgiler uygulamayla birlikte paketlenir. Masaüstü tipi uygulamalarda Google bu secret'ı gizli saymaz, yine de depo herkese açıksa repoya yazmak yerine yalnızca derleme sırasında dosyayı ekleyebilirsin.
+4. Çıkan Client ID ve Secret'ı **depoya yazma** (GitHub push koruması engeller). GitHub → Settings → Secrets and variables → Actions → *New repository secret* ile `GOOGLE_CLIENT_ID` ve `GOOGLE_CLIENT_SECRET` adıyla ekle; sürüm derlenirken `server/google.json` otomatik oluşturulur ve uygulamayla paketlenir. Yerelde denemek için aynı adlı ortam değişkenlerini ver.
+5. Yayınlamak için OAuth izin ekranında ana sayfa ve gizlilik politikası adresi gerekir: ana sayfa `https://github.com/yonarasd-creator/Yoni`, gizlilik `https://github.com/yonarasd-creator/Yoni/blob/main/PRIVACY.md`. Masaüstü tipi uygulamalarda Google bu secret'ı gizli saymaz, yine de depo herkese açıksa repoya yazmak yerine yalnızca derleme sırasında dosyayı ekleyebilirsin.
