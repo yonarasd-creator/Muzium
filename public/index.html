@@ -83,7 +83,11 @@ html.bl nav,html.bl .card,html.bl #bar{backdrop-filter:blur(var(--bl,0px))}
 .btn,input[type=text],input[type=password],textarea,.card,dialog,.ban{border-radius:var(--r,12px)}
 textarea{width:100%;padding:12px;border:0;background:var(--s);color:var(--t);margin-bottom:10px;font:inherit;resize:vertical}
 nav button{font-size:13px;padding:12px 2px;white-space:nowrap}
-.av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#2a2a2c;flex:none}.av.lg{width:84px;height:84px;border:4px solid var(--bgs)}
+.av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#2a2a2c;flex:none}
+.pcd{background:var(--s);border-radius:var(--r,16px);overflow:hidden;padding-bottom:16px;min-width:min(80vw,360px)}
+.pcd .ban{height:120px;border-radius:0}.pcd .av.lg{display:block;position:relative;z-index:2;width:88px;height:88px;border:6px solid var(--s);background:var(--s);margin:-46px 0 0 16px}
+.pnm{padding:4px 18px 0}.pnm h3{margin:8px 0 0;font-size:20px}.pst{margin-top:8px;font-size:13px}
+.pbx{background:rgba(128,128,128,.14);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}.pbx b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--m);margin-bottom:4px}
 .ban{height:110px;background:var(--a) center/cover;position:relative;overflow:hidden}.ban video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}@media (prefers-reduced-motion:reduce){.ban video{display:none}}
 .dot{width:9px;height:9px;border-radius:50%;background:#666;display:inline-block}.dot.on{background:#3ba55d}
 .msgs{display:flex;flex-direction:column;gap:6px;min-height:40vh}.msg{max-width:82%;padding:8px 12px;border-radius:14px;background:var(--s);word-break:break-word;align-self:flex-start}.msg.me{align-self:flex-end;background:var(--a);color:#000}
@@ -513,13 +517,13 @@ async function shareTrack(t){
  d.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{d.close();try{await api('POST','/messages/'+b.dataset.u,{text:'',att:{type:'track',track:{id:t.id,title:t.title,artist:t.artist,art:t.art||'',url:t.url||'',aid:t.aid||'',src:t.src||''}}});toast('Gönderildi ✓')}catch(e){toast(e.message)}})}
 async function showProfile(un){
  try{const u=un==ME.username?ME:(await api('GET','/users/'+un)).user,d=$('#dlg');
-  d.innerHTML=`<div class="ban" style="${banStyle(u)}">${banIn(u)}</div><img class="av lg" src="${esc(AV(u))}" style="margin:-42px 0 0 14px"><h3 style="margin:6px 0 0">${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'çevrimiçi':'çevrimdışı'}</small>${u.status?`<p>${esc(u.status)}</p>`:''}<p>${esc(u.bio)}</p><small class="muted">Katılım: ${new Date(u.created).toLocaleDateString('tr')}</small><br><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
+  d.innerHTML=`<div class="pcd"><div class="ban" style="${banStyle(u)}">${banIn(u)}</div><img class="av lg" src="${esc(AV(u))}" alt=""><div class="pnm"><h3>${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'🟢 çevrimiçi':'çevrimdışı'}</small>${u.status?`<div class="pst">${esc(u.status)}</div>`:''}<div class="pbx"><b>Hakkımda</b>${u.bio?esc(u.bio):'<span class="muted">Henüz bir şey yazılmamış.</span>'}</div>${u.created?`<div class="pbx"><b>Üyelik</b>${new Date(u.created).toLocaleDateString('tr',{day:'numeric',month:'long',year:'numeric'})}</div>`:''}</div></div><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
   d.showModal();$('#x').onclick=()=>d.close()}catch(e){toast(e.message)}}
 async function shrink(f,w,h){const b=await createImageBitmap(f),c=document.createElement('canvas');c.width=w;c.height=h;const k=Math.max(w/b.width,h/b.height),sw=w/k,sh=h/k;c.getContext('2d').drawImage(b,(b.width-sw)/2,(b.height-sh)/2,sw,sh,0,0,w,h);return c.toDataURL('image/jpeg',.82)}
 function vMe(){
  if(!ME){M.innerHTML='<p class="muted">Hesapsız / çevrimdışı moddasın.</p><button class="btn" id="li">Giriş yap veya hesap oluştur</button>';return $('#li').onclick=()=>{offline=false;showAuth()}}
  const pend={};
- M.innerHTML=`<div id="pc2"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div><img class="av lg" id="pa" src="${esc(AV(ME))}" style="margin:-42px 0 10px 14px">
+ M.innerHTML=`<div id="pc2"><div class="pcd" style="margin-bottom:12px"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div><img class="av lg" id="pa" src="${esc(AV(ME))}" alt=""><div class="pnm"><h3>${esc(ME.display)}</h3><small class="muted">@${esc(ME.username)}</small></div></div>
  <div><button class="btn g" id="ua">Fotoğraf</button> <button class="btn g" id="ub">Kapak</button> <button class="btn g" id="ra">Fotoğrafı kaldır</button> <button class="btn g" id="rb">Kapağı kaldır</button></div>
  <small class="muted" style="display:block;margin:4px 0 8px">Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Kapak: görsel, GIF veya kısa video (MP4/WebM, en fazla 6 MB; sessiz ve döngüde oynar).</small>
  <input type="file" id="fa" accept="image/*" hidden><input type="file" id="fb" accept="image/*,video/mp4,video/webm" hidden>
