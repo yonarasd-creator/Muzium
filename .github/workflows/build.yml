@@ -24,6 +24,18 @@ jobs:
             echo "::error::Etiket ${{ github.ref_name }} ama package.json sürümü $V. Önce package.json'daki version değerini etikete eşitleyip merge et, sonra Release aç."
             exit 1
           fi
+      - name: Google giriş kimliğini ekle (depoda tutulmaz, GitHub Secrets'tan gelir)
+        shell: bash
+        env:
+          GCID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GSEC: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          if [ -n "$GCID" ]; then
+            node -e "require('fs').writeFileSync('server/google.json', JSON.stringify({cid: process.env.GCID, sec: process.env.GSEC}))"
+            echo "Google kimliği eklendi."
+          else
+            echo "::warning::GOOGLE_CLIENT_ID tanımlı değil, YouTube girişi bu sürümde çalışmaz."
+          fi
       - run: npm install
       - run: npx electron-builder --publish always
         env:
