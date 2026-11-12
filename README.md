@@ -74,7 +74,7 @@ Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgil
 Çizim PNG değil, her karede iskeletten (gövde, kafa, bacak, kuyruk) kodla yapılır: `public/kedi-art.js` (çizim), `public/kedi.js` (davranış). Yeni tür için `kedi-art.js` içindeki `T` tablosuna renk paleti ekle.
 
 ## Hareketli profil fotoğrafı ve videolu kapak
-Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 5 MB). Profil → Kapak: görsel/GIF/WebP (en fazla 10 MB) veya kısa MP4/WebM video (en fazla 25 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
+Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 120 MB). Profil → Kapak: görsel, GIF/WebP veya MP4/WebM video (en fazla 40 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
 
 ## YouTube hesabını bağlama (Google ile giriş)
 Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı sadece Google'da giriş yapar; beğendiği müzikler ve playlistler listelerine aktarılır, YouTube aramaları kendi hesabıyla yapılır (API anahtarı gerekmez), kediler beğenilenlerden şarkı önerir. Jetonlar yalnızca kullanıcının cihazında tutulur.

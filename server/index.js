@@ -112,12 +112,12 @@ const kind = b => {
   if (b[0] == 0x1a && b[1] == 0x45 && b[2] == 0xdf && b[3] == 0xa3) return ['webm', 'video'];
   return null;
 };
-const MAXB = { avatar: { image: 5e6, video: 0 }, banner: { image: 10e6, video: 25e6 } };
+const MAXB = { avatar: { image: 120e6, video: 0 }, banner: { image: 40e6, video: 40e6 } };
 app.put('/api/me/media/:kind', auth, (q, s, n) => {
   if (!MAXB[q.params.kind]) return s.status(404).json({ error: 'Bulunamadı' });
   if (limit('u' + q.ip, 12, 6e4)) return s.status(429).json({ error: 'Çok fazla yükleme, biraz bekle' });
   n();
-}, express.raw({ type: () => true, limit: '26mb' }), (q, s) => {
+}, express.raw({ type: () => true, limit: '121mb' }), (q, s) => {
   try {
     const k = q.params.kind, u = q.me, b = Buffer.isBuffer(q.body) ? q.body : Buffer.alloc(0), t = kind(b);
     if (!t) throw new Error('Desteklenmeyen dosya (JPG, PNG, GIF, WebP' + (k == 'banner' ? ', MP4, WebM' : '') + ')');
