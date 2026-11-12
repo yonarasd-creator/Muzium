@@ -76,5 +76,11 @@ Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgil
 ## Hareketli profil fotoğrafı ve videolu kapak
 Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 1,5 MB). Profil → Kapak: görsel, GIF/WebP (en fazla 3 MB) veya kısa MP4/WebM video (en fazla 6 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
 
-## YouTube hesabını bağlama
-Aktar → YouTube hesabı: Google OAuth (PKCE) ile hesap bağlanır; beğenilen müzikler ve playlistler listelere aktarılır, bağlıyken YouTube aramaları API anahtarı olmadan yapılır, kediler beğenilenlerden şarkı önerir. Kurulum için Google Cloud projesinde YouTube Data API v3 + OAuth istemci kimliği (Web uygulaması) gerekir; yönlendirme URI: `<uygulama adresi>/api/yt/callback` (masaüstü: `http://localhost:38123/api/yt/callback`). Jetonlar yalnızca cihazda (localStorage) tutulur, sunucu sadece Google ile el sıkışmayı yapar.
+## YouTube hesabını bağlama (Google ile giriş)
+Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı sadece Google'da giriş yapar; beğendiği müzikler ve playlistler listelerine aktarılır, YouTube aramaları kendi hesabıyla yapılır (API anahtarı gerekmez), kediler beğenilenlerden şarkı önerir. Jetonlar yalnızca kullanıcının cihazında tutulur.
+
+**Uygulama sahibinin tek seferlik kurulumu** (kullanıcılar bunu yapmaz):
+1. console.cloud.google.com → proje oluştur → **YouTube Data API v3**'ü etkinleştir.
+2. OAuth izin ekranı: *Harici*; "Test kullanıcıları"na hesapları ekle (doğrulama olmadan en fazla 100 kişi).
+3. Kimlik bilgileri → OAuth istemci kimliği → *Web uygulaması*; yetkili yönlendirme URI'si: `http://localhost:38123/api/yt/callback` (masaüstü) ve varsa kendi sunucu adresin için `https://alanadin/api/yt/callback`.
+4. Çıkan Client ID ve Secret'ı `server/google.json` dosyasına yaz (ya da `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` ortam değişkeni). Bu bilgiler uygulamayla birlikte paketlenir. Masaüstü tipi uygulamalarda Google bu secret'ı gizli saymaz, yine de depo herkese açıksa repoya yazmak yerine yalnızca derleme sırasında dosyayı ekleyebilirsin.

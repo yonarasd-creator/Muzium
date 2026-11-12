@@ -130,13 +130,15 @@ app.put('/api/me/media/:kind', auth, (q, s, n) => {
   } catch (e) { s.status(400).json({ error: e.message }); }
 });
 // ---- YouTube hesabını bağlama (Google OAuth, PKCE). Jetonlar sunucuda saklanmaz; yalnızca isteyen cihaza bir kez teslim edilir.
+const GCFG = (() => { let f = {}; try { f = require('./google.json'); } catch {} return { cid: process.env.GOOGLE_CLIENT_ID || f.cid || '', sec: process.env.GOOGLE_CLIENT_SECRET || f.sec || '' }; })();
 const ytp = new Map();
+app.get('/api/yt/config', (q, s) => s.json({ ready: !!GCFG.cid }));
 setInterval(() => { const n = Date.now(); for (const [k, v] of ytp) if (v.exp < n) ytp.delete(k); }, 6e4).unref();
 const ytPage = (s, ok, msg) => s.type('html').send(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Yoni</title><body style="font:16px system-ui;background:#111;color:#f2f2f2;display:grid;place-items:center;height:100vh;margin:0;text-align:center"><div><div style="font-size:48px">${ok ? '✅' : '⚠️'}</div><p>${msg}</p></div>`);
 const gtoken = async o => { const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(o) }); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error_description || j.error || 'Google hatası'); return j; };
 app.post('/api/yt/start', (q, s) => {
   if (limit('ys' + q.ip, 10, 6e4)) return s.status(429).json({ error: 'Çok fazla deneme, biraz bekle' });
-  const cid = S(q.body.cid, 200).trim(), sec = S(q.body.sec, 200).trim(), ru = S(q.body.ru, 300);
+  const own = S(q.body.cid, 200).trim(), cid = own || GCFG.cid, sec = own ? S(q.body.sec, 200).trim() : GCFG.sec, ru = S(q.body.ru, 300);
   if (!/^[\w.-]+\.apps\.googleusercontent\.com$/.test(cid)) return s.status(400).json({ error: 'Geçersiz Client ID' });
   if (!/^https?:\/\/[\w.-]+(:\d+)?\/api\/yt\/callback$/.test(ru)) return s.status(400).json({ error: 'Geçersiz yönlendirme adresi' });
   const state = crypto.randomBytes(24).toString('hex'), ver = crypto.randomBytes(32).toString('base64url');
@@ -164,7 +166,7 @@ app.post('/api/yt/poll', (q, s) => {
 app.post('/api/yt/refresh', async (q, s) => {
   if (limit('yr' + q.ip, 30, 6e4)) return s.status(429).json({ error: 'Çok fazla deneme' });
   try {
-    const j = await gtoken({ client_id: S(q.body.cid, 200), ...(q.body.sec ? { client_secret: S(q.body.sec, 200) } : {}), refresh_token: S(q.body.rt, 500), grant_type: 'refresh_token' });
+    const own = S(q.body.cid, 200), j = await gtoken({ client_id: own || GCFG.cid, ...((own ? q.body.sec : GCFG.sec) ? { client_secret: own ? S(q.body.sec, 200) : GCFG.sec } : {}), refresh_token: S(q.body.rt, 500), grant_type: 'refresh_token' });
     s.json({ access_token: j.access_token, expires_in: j.expires_in || 3600 });
   } catch (e) { s.status(400).json({ error: e.message }); }
 });
