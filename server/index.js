@@ -19,12 +19,13 @@ const save = () => { if (!tm) tm = setTimeout(flush, 400); };
 const HEX = /^#[0-9a-fA-F]{6}$/, pk = (a, b) => [a, b].sort().join('|');
 const S = (v, n) => typeof v == 'string' ? v.slice(0, n) : '';
 const num = (v, a, b, d) => Number.isFinite(+v) ? Math.min(b, Math.max(a, +v)) : d;
+const fit = v => Array.isArray(v) && v.length == 3 ? [num(v[0], 0, 100, 50), num(v[1], 0, 100, 50), num(v[2], 1, 4, 1)] : null;
 const hash = (pw, salt) => new Promise((ok, no) => crypto.scrypt(pw, salt, 64, (e, k) => e ? no(e) : ok(k.toString('hex'))));
 const conns = new Map();
 const push = (u, o) => conns.get(u)?.forEach(w => w.readyState == 1 && w.send(JSON.stringify(o)));
 const pub = u => ({ username: u.username, display: u.display, bio: u.bio, status: u.status, color: u.color,
   avatar: u.avatar ? `/uploads/${u.avatar}?v=${u.av}` : '', banner: u.banner ? `/uploads/${u.banner}?v=${u.bv}` : '',
-  created: u.created, online: conns.has(u.username), np: conns.has(u.username) ? u.np || null : null });
+  afit: u.afit || null, bfit: u.bfit || null, created: u.created, online: conns.has(u.username), np: conns.has(u.username) ? u.np || null : null });
 const me = u => ({ ...pub(u), theme: u.theme || null });
 const isFriend = (a, b) => db.friends[pk(a, b)]?.status == 'friends';
 const notify = un => { for (const r of Object.values(db.friends)) if (r.status == 'friends' && r.u.includes(un)) push(r.u.find(x => x != un), { type: 'presence', u: pub(db.users[un]) }); };
@@ -98,6 +99,8 @@ app.patch('/api/me', auth, (q, s) => {
     if ('theme' in b) u.theme = theme(b.theme);
     if ('avatar' in b) img(u, 'avatar', b.avatar);
     if ('banner' in b) img(u, 'banner', b.banner);
+    if ('afit' in b) u.afit = fit(b.afit);
+    if ('bfit' in b) u.bfit = fit(b.bfit);
     save(); notify(u.username); s.json({ user: me(u) });
   } catch (e) { s.status(400).json({ error: e.message }); }
 });
