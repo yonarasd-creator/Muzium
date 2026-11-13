@@ -71,6 +71,7 @@ Her yıl 10 Kasım'da uygulama açılırken Atatürk'ü anan kısa bir video gö
 ## Kediler 🐱
 Ayarlar → **Kediler** bölümünden açılıp kapatılır; 9 türden (zencefil, kahve, gece, pamuk, alaca, smokin, tüylü, sütlü, tekir) en fazla 3 kedi seçilir.
 Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgileri zemin olarak tarar, üstünde yürür, bir kenardan diğerine zıplar, aşağı atlar, pencere kenarına tırmanır, kutunun ucunda **kuyruğu sarkıtarak uyur**, tımar eder, esner, gerinir, imlece bakar, arada fare kovalar; üzerine gelince sevilir, müzik çalarken oturanlar sallanır. Tıklamayı engellemezler, "hareketi azalt" ayarında zıplamaz/tırmanmazlar.
+**Mod menüsü:** kediye sağ tıkla (dokunmatikte uzun bas) → "Bugün modun ne?" → Sakin, Enerjik, Odak, Hüzünlü, Eğlenceli, Gece, Yürüyüş. Kedi o moda uyan bir şarkı önerir (**Çal**, **Playlist yap**, **Başka**, **Uymuyor**). Öneriler dinleme geçmişinden (mod seçiliyken dinlediklerin 6 saat boyunca o moda sayılır), şarkı adı/sanatçı anahtar kelimelerinden ve eksik kalırsa arama kaynaklarından gelir; "Uymuyor" dediğin şarkı o modda bir daha önerilmez.
 Çizim PNG değil, her karede iskeletten (gövde, kafa, bacak, kuyruk) kodla yapılır: `public/kedi-art.js` (çizim), `public/kedi.js` (davranış). Yeni tür için `kedi-art.js` içindeki `T` tablosuna renk paleti ekle.
 
 ## Hareketli profil fotoğrafı ve videolu kapak

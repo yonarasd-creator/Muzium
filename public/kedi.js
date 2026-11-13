@@ -42,6 +42,7 @@
 #kedi .kb{position:absolute;left:0;top:0;pointer-events:auto;background:var(--card,#26262e);color:var(--tx,#fff);border:1px solid var(--a,#1fb89a);border-radius:12px;padding:8px 10px;font:13px/1.35 system-ui,sans-serif;max-width:230px;box-shadow:0 6px 22px rgba(0,0,0,.4);animation:kb-in .25s ease}
 #kedi .kb small{display:block;opacity:.7;margin-top:2px}#kedi .kb div{display:flex;gap:6px;margin-top:7px}
 #kedi .kb button{font:12px system-ui;border:0;border-radius:999px;padding:5px 11px;cursor:pointer;background:var(--a,#1fb89a);color:#06201a}#kedi .kb button+button{background:rgba(128,128,128,.25);color:inherit}
+#kedi .kb button.g{background:rgba(128,128,128,.25);color:inherit}#kedi .kb .km{flex-wrap:wrap}#kedi .kb .km button{background:rgba(128,128,128,.25);color:inherit}#kedi .kb .km button:hover,#kedi .kb button.g:hover{background:var(--a,#1fb89a);color:#06201a}#kedi .kb.w{max-width:260px}
 @keyframes kb-in{from{opacity:0;transform:translateY(6px)}}
 #kedi .kp{pointer-events:none;animation:kp-up 1.3s ease-out forwards}
 #kedi .kz{animation-duration:2.4s;animation-name:kz-up}
@@ -233,6 +234,44 @@
     const [b1, b2] = el.querySelectorAll('button'); b1.onclick = () => { try { window.kediPlay(r.t); } catch {} puff('heart', c.x - 10, c.y - 74); closeSug(); }; b2.onclick = closeSug;
     layer.appendChild(el); setSt(c, 'sit', 14); sug = { el, c, life: 14 };
   }
+
+
+  // ---- mod menüsü: kediye sağ tık (ya da dokunmatikte uzun bas) → mod seç → şarkı önerir ya da playlist yapar ----
+  function bubble(c, html, life, cls) {
+    closeSug(); const el = document.createElement('div'); el.className = 'kb' + (cls ? ' ' + cls : ''); el.innerHTML = html;
+    layer.appendChild(el); setSt(c, 'sit', life); sug = { el, c, life }; return el;
+  }
+  const hitCat = (x, y) => cats.find(c => !busy(c) && Math.abs(x - c.x) < 34 && y > c.y - 62 && y < c.y + 4);
+  function moodMenu(c) {
+    const M = window.kediModes || []; if (!M.length || !window.kediMood) return;
+    const el = bubble(c, `😺 Bugün modun ne?<div class="km">${M.map(m => `<button data-k="${m.k}">${m.e} ${esc(m.n)}</button>`).join('')}</div><div><button class="g x">Şimdi değil</button></div>`, 40, 'w');
+    el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => moodPick(c, b.dataset.k, []));
+    el.querySelector('.x').onclick = closeSug;
+  }
+  async function moodPick(c, k, skip) {
+    const m = window.kediModes.find(x => x.k == k); if (!m) return;
+    try { window.kediMoodSet && window.kediMoodSet(k); } catch {}
+    const el = bubble(c, `${m.e} ${esc(m.n)} için bakıyorum…`, 40);
+    let r = null; try { r = await window.kediMood(k, skip); } catch {}
+    if (!sug || sug.el !== el) return;
+    if (!r || !r.t) { bubble(c, `${m.e} Şu an ${esc(m.n)} için bir şey bulamadım 😿<small>Biraz daha müzik dinle ya da arama kaynağı ekle.</small><div><button class="g x">Tamam</button></div>`, 10).querySelector('.x').onclick = closeSug; return; }
+    const e2 = bubble(c, `${m.e} ${esc(m.n)} modu için:<small>${esc(r.t.title)} · ${esc(r.t.artist || '')}</small><div><button data-a="play">▶ Çal</button><button data-a="list">📃 Playlist yap</button></div><div><button class="g" data-a="next">🔄 Başka</button><button class="g" data-a="no">👎 Uymuyor</button></div>`, 45, 'w');
+    const go = a => async () => {
+      if (a == 'play') { try { window.kediPlay(r.t); } catch {} puff('heart', c.x - 10, c.y - 74); closeSug(); }
+      else if (a == 'list') { closeSug(); try { await window.kediMoodList(k, r); } catch {} puff('heart', c.x - 10, c.y - 74); }
+      else { if (a == 'no') { try { window.kediMoodNo(k, r.t); } catch {} } moodPick(c, k, [...skip, r.t.id]); }
+    };
+    e2.querySelectorAll('[data-a]').forEach(b => b.onclick = go(b.dataset.a));
+  }
+  document.addEventListener('contextmenu', e => { const c = hitCat(e.clientX, e.clientY); if (c) { e.preventDefault(); moodMenu(c); } });
+  let lp = null;
+  document.addEventListener('pointerdown', e => {
+    clearTimeout(lp); if (sug && !e.target.closest('#kedi .kb')) closeSug();
+    if (e.pointerType == 'mouse' || !hitCat(e.clientX, e.clientY)) return;
+    const x = e.clientX, y = e.clientY; lp = setTimeout(() => { const c = hitCat(x, y); if (c) moodMenu(c); }, 650);
+  }, { passive: true });
+  document.addEventListener('pointermove', e => { if (lp && e.pointerType != 'mouse') { clearTimeout(lp); lp = null; } }, { passive: true });
+  document.addEventListener('pointerup', () => { clearTimeout(lp); lp = null; }, { passive: true });
 
   // ---- poz (kedi-art parametreleri) ----
   const tph = (T, rate) => +((Math.floor(T * rate) % 16) * Math.PI / 8).toFixed(3);
