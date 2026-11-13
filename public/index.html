@@ -88,7 +88,7 @@ nav button{font-size:13px;padding:12px 2px;white-space:nowrap}
 .pcd .ban{height:120px;border-radius:0}.pcd .av.lg{display:block;position:relative;z-index:2;width:88px;height:88px;border:6px solid var(--s);background:var(--s);margin:-46px 0 0 16px}
 .pnm{padding:4px 18px 0}.pnm h3{margin:8px 0 0;font-size:20px}.pst{margin-top:8px;font-size:13px}
 .pbx{background:rgba(128,128,128,.14);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}.pbx b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--m);margin-bottom:4px}
-.ban{height:110px;background:var(--a) center/cover;position:relative;overflow:hidden}.ban video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}@media (prefers-reduced-motion:reduce){.ban video{display:none}}
+.ban{height:110px;background:var(--a) center/cover;position:relative;overflow:hidden}.ban video,.ban img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}@media (prefers-reduced-motion:reduce){.ban video{display:none}}.avf{overflow:hidden}.avf img{width:100%;height:100%;object-fit:cover;display:block;border-radius:0}#cv img,#cv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .dot{width:9px;height:9px;border-radius:50%;background:#666;display:inline-block}.dot.on{background:#3ba55d}
 .msgs{display:flex;flex-direction:column;gap:6px;min-height:40vh}.msg{max-width:82%;padding:8px 12px;border-radius:14px;background:var(--s);word-break:break-word;align-self:flex-start}.msg.me{align-self:flex-end;background:var(--a);color:#000}
 .bd{background:var(--a);color:#000;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:4px}
@@ -457,7 +457,10 @@ let ME=null,ws=null,offline=false,chatWith=null,FR={friends:[],incoming:[],outgo
 const api=async(m,u,b)=>{const r=await fetch('/api'+u,{method:m,headers:b?{'Content-Type':'application/json'}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Hata');return j};
 const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}},lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const AV=u=>u.avatar||PH;
-const isVid=u=>/\.(mp4|webm)(\?|$)/i.test(u||''),banStyle=u=>u.banner&&!isVid(u.banner)?`background-image:url('${esc(u.banner)}')`:`background:${esc(u.color)}`,banIn=u=>u.banner&&isVid(u.banner)?`<video src="${esc(u.banner)}" autoplay muted loop playsinline></video>`:'';
+const isVid=u=>/\.(mp4|webm)(\?|$)/i.test(u||''),fitSt=f=>Array.isArray(f)?`object-position:${f[0]}% ${f[1]}%;transform:scale(${f[2]});transform-origin:${f[0]}% ${f[1]}%`:'',
+banStyle=u=>u.banner&&!isVid(u.banner)&&!u.bfit?`background-image:url('${esc(u.banner)}')`:`background:${esc(u.color)}`,
+banIn=u=>!u.banner?'':isVid(u.banner)?`<video src="${esc(u.banner)}" autoplay muted loop playsinline style="${fitSt(u.bfit)}"></video>`:u.bfit?`<img src="${esc(u.banner)}" alt="" style="${fitSt(u.bfit)}">`:'',
+avLg=(u,id)=>u.afit?`<div class="av lg avf"${id?` id="${id}"`:''}><img src="${esc(AV(u))}" alt="" style="${fitSt(u.afit)}"></div>`:`<img class="av lg"${id?` id="${id}"`:''} src="${esc(AV(u))}" alt="">`;
 async function boot(){
  loadTheme();
  try{ME=(await api('GET','/me')).user;lsSet('me',ME);if(ME.theme&&!lsGet('theme')){Object.assign(TH,ME.theme);lsSet('theme',TH);applyVars(TH);setBg(TH)}}
@@ -524,13 +527,33 @@ async function shareTrack(t){
  d.querySelectorAll('[data-u]').forEach(b=>b.onclick=async()=>{d.close();try{await api('POST','/messages/'+b.dataset.u,{text:'',att:{type:'track',track:{id:t.id,title:t.title,artist:t.artist,art:t.art||'',url:t.url||'',aid:t.aid||'',src:t.src||''}}});toast('Gönderildi ✓')}catch(e){toast(e.message)}})}
 async function showProfile(un){
  try{const u=un==ME.username?ME:(await api('GET','/users/'+un)).user,d=$('#dlg');
-  d.innerHTML=`<div class="pcd"><div class="ban" style="${banStyle(u)}">${banIn(u)}</div><img class="av lg" src="${esc(AV(u))}" alt=""><div class="pnm"><h3>${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'🟢 çevrimiçi':'çevrimdışı'}</small>${u.status?`<div class="pst">${esc(u.status)}</div>`:''}<div class="pbx"><b>Hakkımda</b>${u.bio?esc(u.bio):'<span class="muted">Henüz bir şey yazılmamış.</span>'}</div>${u.created?`<div class="pbx"><b>Üyelik</b>${new Date(u.created).toLocaleDateString('tr',{day:'numeric',month:'long',year:'numeric'})}</div>`:''}</div></div><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
+  d.innerHTML=`<div class="pcd"><div class="ban" style="${banStyle(u)}">${banIn(u)}</div>${avLg(u)}<div class="pnm"><h3>${esc(u.display)}</h3><small class="muted">@${esc(u.username)} · ${u.online?'🟢 çevrimiçi':'çevrimdışı'}</small>${u.status?`<div class="pst">${esc(u.status)}</div>`:''}<div class="pbx"><b>Hakkımda</b>${u.bio?esc(u.bio):'<span class="muted">Henüz bir şey yazılmamış.</span>'}</div>${u.created?`<div class="pbx"><b>Üyelik</b>${new Date(u.created).toLocaleDateString('tr',{day:'numeric',month:'long',year:'numeric'})}</div>`:''}</div></div><button class="btn g" id="x" style="margin-top:10px">Kapat</button>`;
   d.showModal();$('#x').onclick=()=>d.close()}catch(e){toast(e.message)}}
 async function shrink(f,w,h){const b=await createImageBitmap(f),c=document.createElement('canvas');c.width=w;c.height=h;const k=Math.max(w/b.width,h/b.height),sw=w/k,sh=h/k;c.getContext('2d').drawImage(b,(b.width-sw)/2,(b.height-sh)/2,sw,sh,0,0,w,h);return c.toDataURL('image/jpeg',.82)}
+async function bake(f,fit,w,h){const b=await createImageBitmap(f),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),k=Math.max(w/b.width,h/b.height),cw=b.width*k,ch=b.height*k,px=w*fit[0]/100,py=h*fit[1]/100;x.fillStyle='#111';x.fillRect(0,0,w,h);x.translate(px,py);x.scale(fit[2],fit[2]);x.translate(-px,-py);x.drawImage(b,(w-cw)*fit[0]/100,(h-ch)*fit[1]/100,cw,ch);let q=.9,r=c.toDataURL('image/jpeg',q);while(r.length*.75>285e3&&q>.4){q-=.08;r=c.toDataURL('image/jpeg',q)}return r}
+function cropper(f,o){return new Promise(res=>{
+ const d=$('#dlg'),u=URL.createObjectURL(f),v=/^video\//.test(f.type),W=o.round?240:330,H=o.round?240:110;let X=50,Y=50,Z=1,nw=0,nh=0,done=0;
+ d.innerHTML=`<b>${o.title}</b><div id="cv" style="position:relative;overflow:hidden;width:${W}px;height:${H}px;margin:14px auto 10px;background:#000;touch-action:none;cursor:grab;border-radius:${o.round?'50%':'10px'}">${v?`<video src="${u}" autoplay muted loop playsinline></video>`:`<img src="${u}" alt="">`}</div>
+ <label class="f">Yakınlaştır<input type="range" id="cz" min="1" max="4" step="0.01" value="1" style="width:100%"></label>
+ <small class="muted" style="display:block;margin:4px 0 10px">Sürükleyerek konumlandır, kaydırıcı veya fare tekerleğiyle yakınlaştır.</small>
+ <button class="btn" id="cok">Tamam</button> <button class="btn g" id="crs">Sıfırla</button> <button class="btn g" id="cno">İptal</button>`;
+ const cv=$('#cv'),m=cv.firstElementChild;
+ const paint=()=>{m.style.objectPosition=X+'% '+Y+'%';m.style.transform='scale('+Z+')';m.style.transformOrigin=X+'% '+Y+'%';$('#cz').value=Z};
+ m.addEventListener(v?'loadedmetadata':'load',()=>{nw=m.naturalWidth||m.videoWidth;nh=m.naturalHeight||m.videoHeight});
+ const rng=()=>{const k=nw?Math.max(W/nw,H/nh):1,ox=nw?Math.max(0,nw*k-W):0,oy=nh?Math.max(0,nh*k-H):0;return[Math.max(20,ox+W*(Z-1)),Math.max(20,oy+H*(Z-1))]};
+ let st=null;cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);st={x:e.clientX,y:e.clientY};cv.style.cursor='grabbing'};
+ cv.onpointermove=e=>{if(!st)return;const[rx,ry]=rng();X=Math.min(100,Math.max(0,X-(e.clientX-st.x)/rx*100));Y=Math.min(100,Math.max(0,Y-(e.clientY-st.y)/ry*100));st={x:e.clientX,y:e.clientY};paint()};
+ cv.onpointerup=cv.onpointercancel=()=>{st=null;cv.style.cursor='grab'};
+ cv.onwheel=e=>{e.preventDefault();Z=Math.min(4,Math.max(1,Z-e.deltaY/600));paint()};
+ $('#cz').oninput=e=>{Z=+e.target.value;paint()};
+ $('#crs').onclick=()=>{X=Y=50;Z=1;paint()};
+ const fin=r=>{if(done)return;done=1;URL.revokeObjectURL(u);d.close();res(r)};
+ $('#cok').onclick=()=>fin({fit:[Math.round(X*10)/10,Math.round(Y*10)/10,Math.round(Z*100)/100]});$('#cno').onclick=()=>fin(null);d.addEventListener('close',()=>fin(null),{once:true});
+ d.showModal();paint()})}
 function vMe(){
  if(!ME){M.innerHTML='<p class="muted">Hesapsız / çevrimdışı moddasın.</p><button class="btn" id="li">Giriş yap veya hesap oluştur</button>';return $('#li').onclick=()=>{offline=false;showAuth()}}
  const pend={};
- M.innerHTML=`<div id="pc2"><div class="pcd" style="margin-bottom:12px"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div><img class="av lg" id="pa" src="${esc(AV(ME))}" alt=""><div class="pnm"><h3>${esc(ME.display)}</h3><small class="muted">@${esc(ME.username)}</small></div></div>
+ M.innerHTML=`<div id="pc2"><div class="pcd" style="margin-bottom:12px"><div class="ban" id="pb" style="${banStyle(ME)}">${banIn(ME)}</div>${avLg(ME,'pa')}<div class="pnm"><h3>${esc(ME.display)}</h3><small class="muted">@${esc(ME.username)}</small></div></div>
  <div><button class="btn g" id="ua">Fotoğraf</button> <button class="btn g" id="ub">Kapak</button> <button class="btn g" id="ra">Fotoğrafı kaldır</button> <button class="btn g" id="rb">Kapağı kaldır</button></div>
  <small class="muted" style="display:block;margin:4px 0 8px">Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 120 MB). Kapak: görsel, GIF veya video (MP4/WebM, en fazla 40 MB; video sessiz ve döngüde oynar).</small>
  <input type="file" id="fa" accept="image/*" hidden><input type="file" id="fb" accept="image/*,video/mp4,video/webm" hidden>
@@ -541,15 +564,22 @@ function vMe(){
  <button class="btn" id="sv">Kaydet</button> <button class="btn g" id="vw2">Önizle</button> <button class="btn g" id="lo">Çıkış yap</button></div>`;
  $('#ua').onclick=()=>$('#fa').click();$('#ub').onclick=()=>$('#fb').click();
  const raw={},anim=async f=>f.type=='image/gif'||(f.type=='image/webp'&&new TextDecoder('latin1').decode(await f.slice(0,160).arrayBuffer()).includes('ANIM')),vid=f=>/^video\/(mp4|webm)$/.test(f.type);
- $('#fa').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-  if(await anim(f)){if(f.size>120e6)return toast('Hareketli fotoğraf en fazla 120 MB olabilir');raw.avatar=f;delete pend.avatar;$('#pa').src=URL.createObjectURL(f)}
-  else{pend.avatar=await shrink(f,256,256);delete raw.avatar;$('#pa').src=pend.avatar}};
- $('#fb').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const pb=$('#pb');
-  if(vid(f)||await anim(f)){if(f.size>40e6)return toast('Kapak en fazla 40 MB olabilir');raw.banner=f;delete pend.banner;
-   if(vid(f)){pb.style.background=ME.color;pb.innerHTML=`<video src="${URL.createObjectURL(f)}" autoplay muted loop playsinline></video>`}else{pb.innerHTML='';pb.style.background=`url(${URL.createObjectURL(f)}) center/cover`}}
-  else{pend.banner=await shrink(f,960,320);delete raw.banner;pb.innerHTML='';pb.style.background=`url(${pend.banner}) center/cover`}};
- $('#rb').onclick=()=>{pend.banner='';delete raw.banner;$('#pb').innerHTML='';$('#pb').style.background=ME.color};
- $('#ra').onclick=()=>{pend.avatar='';$('#pa').src=PH};
+ const nf=c=>c.fit[0]==50&&c.fit[1]==50&&c.fit[2]==1?null:c.fit,
+ setA=(src,ft)=>{$('#pa').outerHTML=avLg({avatar:src,afit:ft},'pa')},
+ setB=(src,ft,isv)=>{const pb=$('#pb');pb.style.background=ME.color;pb.innerHTML=isv?`<video src="${src}" autoplay muted loop playsinline style="${fitSt(ft)}"></video>`:`<img src="${src}" alt="" style="${fitSt(ft)}">`};
+ $('#fa').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!/^image\//.test(f.type))return toast('Bir görsel seç');
+  const a=await anim(f);if(a&&f.size>120e6)return toast('Hareketli fotoğraf en fazla 120 MB olabilir');
+  const c=await cropper(f,{round:1,title:'Profil fotoğrafını ayarla'});if(!c)return;
+  if(a){raw.avatar=f;delete pend.avatar;pend.afit=nf(c);setA(URL.createObjectURL(f),pend.afit)}
+  else{try{pend.avatar=await bake(f,c.fit,320,320)}catch{return toast('Görsel okunamadı')}delete raw.avatar;pend.afit=null;setA(pend.avatar,null)}};
+ $('#fb').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const v=vid(f),a=!v&&/^image\//.test(f.type)&&await anim(f);
+  if(!v&&!/^image\//.test(f.type))return toast('Görsel veya video seç');
+  if((v||a)&&f.size>40e6)return toast('Kapak en fazla 40 MB olabilir');
+  const c=await cropper(f,{title:'Kapağı ayarla'});if(!c)return;
+  if(v||a){raw.banner=f;delete pend.banner;pend.bfit=nf(c);setB(URL.createObjectURL(f),pend.bfit,v)}
+  else{try{pend.banner=await bake(f,c.fit,1200,400)}catch{return toast('Görsel okunamadı')}delete raw.banner;pend.bfit=null;$('#pb').innerHTML='';$('#pb').style.background=`url(${pend.banner}) center/cover`}};
+ $('#rb').onclick=()=>{pend.banner='';pend.bfit=null;delete raw.banner;$('#pb').innerHTML='';$('#pb').style.background=ME.color};
+ $('#ra').onclick=()=>{pend.avatar='';pend.afit=null;delete raw.avatar;setA(PH,null)};
  $('#vw2').onclick=()=>showProfile(ME.username);
  $('#sv').onclick=async()=>{try{for(const k in raw){const r=await fetch('/api/me/media/'+k,{method:'PUT',headers:{'Content-Type':'application/octet-stream'},body:raw[k]}),j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Yükleme başarısız')}ME=(await api('PATCH','/me',{display:$('#pd').value,status:$('#ps').value,color:$('#pcl').value,bio:$('#pbio').value,...pend})).user;lsSet('me',ME);toast('Profil kaydedildi ✓');vMe()}catch(e){toast(e.message)}};
  $('#lo').onclick=async()=>{try{await api('POST','/logout')}catch{}ws&&ws.close();ws=null;ME=null;lsSet('me',null);lsSet('theme',null);FR={friends:[],incoming:[],outgoing:[]};UNR={};badge();showAuth()}}
