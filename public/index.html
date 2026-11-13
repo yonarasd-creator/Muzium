@@ -268,9 +268,22 @@ async function moodPool(k){const c=moodCache[k];if(c&&Date.now()-c.t<3e5)return 
   const rs=await Promise.allSettled(qs.flatMap(q=>[S.audius(q,0,12),S.youtube(q,0),S.jamendo(q,0,10)]));
   ext=rs.flatMap(r=>r.status=='fulfilled'?r.value:[]).sort(()=>Math.random()-.5)}
  const seen=new Set(),l=[...loc,...ext].filter(t=>t&&t.id&&!seen.has(t.id)&&seen.add(t.id));moodCache[k]={t:Date.now(),l};return l}
+const okMap=new Map();
+const probe=t=>new Promise(ok=>{const u=srcUrl(t);if(!u)return ok(false);const a=new Audio();a.preload='metadata';let d=0;const f=v=>{if(d)return;d=1;clearTimeout(tm);a.removeAttribute('src');a.load();ok(v)},tm=setTimeout(()=>f(false),6000);a.onloadedmetadata=()=>f(true);a.onerror=()=>f(false);a.src=u});
+async function ytOk(ts){let ids=ts.map(t=>t.yid);try{const r=await YT.api('videos?part=status&maxResults=50&id='+ids.join(','));const g=new Set((r.items||[]).filter(v=>v.status&&v.status.embeddable&&v.status.privacyStatus!='private'&&v.status.uploadStatus=='processed').map(v=>v.id));return t=>g.has(t.yid)}catch{return null}}
+async function usable(list,n){const out=[];
+ for(let i=0;i<list.length&&out.length<n;i+=10){const ch=list.slice(i,i+10).filter(t=>!okMap.has(t.id)||okMap.get(t.id));
+  const yv=ch.filter(t=>t.yid&&!okMap.has(t.id)),yf=yv.length?await ytOk(yv):null;
+  const rs=await Promise.all(ch.map(async t=>{if(okMap.has(t.id))return okMap.get(t.id);let v;
+   if(t.yid)v=yf?yf(t):true;else{const b=await get('blobs',t.id).catch(()=>0);v=b?true:(navigator.onLine?await probe(t):false)}
+   okMap.set(t.id,v);return v}));
+  ch.forEach((t,j)=>{if(rs[j]&&out.length<n)out.push(t)})}
+ return out}
 window.kediMood=async(k,skip=[])=>{const f=kmGet('mf')[k]||{},cur=queue&&queue[idx]&&queue[idx].id,pool=(await moodPool(k)).filter(t=>!(f[t.id]<0)&&!skip.includes(t.id)&&t.id!=cur);
- if(!pool.length)return null;const t=pool[Math.random()*Math.min(6,pool.length)|0];return{t,pool}};
-window.kediMoodList=async(k,r)=>{const M=MODES.find(m=>m.k==k),tr=[r.t,...r.pool.filter(t=>t.id!=r.t.id)].slice(0,18),l={id:'mood-'+k,name:`${M.e} Bugünün listesi – ${M.n}`,ids:[]};
+ if(!pool.length)return null;const top=pool.slice(0,8).sort(()=>Math.random()-.5),[t]=await usable([...top,...pool.slice(8,30)],1);
+ return t?{t,pool:pool.filter(x=>x.id!=t.id)}:null};
+window.kediMoodList=async(k,r)=>{const M=MODES.find(m=>m.k==k);toast(`${M.e} ${M.n} listesi hazırlanıyor…`);
+ const tr=[r.t,...await usable(r.pool,17)],l={id:'mood-'+k,name:`${M.e} Bugünün listesi – ${M.n}`,ids:[]};
  await addTo(l,tr);toast(`${M.e} ${M.n} listesi hazır (${tr.length} şarkı)`);play(tr,0)};
 
 async function addRecent(t){bumpPlay(t);moodLearn(t);try{await put('tracks',t);const l=await get('lists','recent')||{id:'recent',name:'🕘 Son dinlenenler',ids:[]};l.ids=[t.id,...l.ids.filter(x=>x!=t.id)].slice(0,30);await put('lists',l)}catch{}}
